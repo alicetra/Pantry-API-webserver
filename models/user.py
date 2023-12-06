@@ -16,24 +16,27 @@ class User(db.Model):
     security_answer = db.Column(db.Text(), nullable=False)  
     pantry = db.relationship('Pantry', back_populates='user', uselist=False)
 
-    #This line is using the bcrypt library’s generate_password_hash function to create a hashed version of the password.
-    #The hashed password is then decoded from bytes to a UTF-8 string and stored in the password_hash attribute.
-    def set_password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+    # This method uses the bcrypt library's generate_password_hash function to create a hashed version of the input string.
+    # The hashed string is then decoded from bytes to a UTF-8 string and returned.
+    def generate_hash(self, original):
+        return bcrypt.generate_password_hash(original).decode('utf-8')
 
-    #This line is using the bcrypt library’s check_password_hash function. It takes two parameters: the hashed password and the password to check.
-    #It compares the hashed version of the password to check with the stored hashed password. If they match, it returns True.
+    # This method uses the bcrypt library's check_password_hash function. It takes two parameters: the hashed string and the original string.
+    # It compares the hashed version of the original string with the stored hashed string. If they match, it returns True. Otherwise, it returns False.
+    def check_hash(self, hashed, original):
+        return bcrypt.check_password_hash(hashed, original)
+
+    def set_password(self, password):
+        self.password_hash = self.generate_hash(password)
+
     def check_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
-    
+        return self.check_hash(self.password_hash, password)
+
     def set_security_answer(self, security_answer):
-        self.security_answer = bcrypt.generate_password_hash(security_answer).decode('utf-8')
+        self.security_answer = self.generate_hash(security_answer)
 
     def check_security_answer(self, security_answer):
-        return bcrypt.check_password_hash(self.security_answer, security_answer)
-
-    def __repr__(self):
-        return '<User %r>' % self.username
+        return self.check_hash(self.security_answer, security_answer)
 
     @staticmethod
     def validate_password(password):
@@ -69,16 +72,17 @@ class User(db.Model):
         email = '@'.join([email_username, email_domain.lower()])
         
         return email
-
-
+        
     @staticmethod
     def validate_security_answer(security_answer):
         if not security_answer.isalpha():
             raise ValidationError("Security answer must only contain alphabetic characters. Special character and spaces are not accepted. Please note that answer will be case-insentitive")
 
-#This event listener decorator means that the function that follows will be executed after a new User record is inserted into the database. Since I want all users to have one pantry it made sense to automatically create one as a user is created their database is too.
+#This event listener decorator means that the function that follows will be executed after a new User record is inserted into the database. 
+#Since I want all users to have one pantry it made sense to automatically create one as a user is created their database is too.
 @event.listens_for(User, 'after_insert')
-#connection is the active database connection, and target is the actual User table that was just inserted. SQLAlchemy will still pass three arguments when the after_insert event is triggered hence why by convention I used _ as a placeholder for a parameter that is not used/needed.
+#connection is the active database connection, and target is the actual User table that was just inserted. 
+#SQLAlchemy will still pass three arguments when the after_insert event is triggered hence why by convention I used _ as a placeholder for a parameter that is not used/needed.
 def create_pantry(_, connection, target):
     #This line creates a new Pantry object associated with the newly created User. The name is set to a string that includes the username of the User
     pantry = Pantry(user_id=target.id, name=f"{target.username}'s Pantry")
