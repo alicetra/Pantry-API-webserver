@@ -6,9 +6,6 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 
-
-
-
 load_dotenv()
 
 password = os.getenv('DB_PASSWORD')
