@@ -65,7 +65,7 @@ def validate_fields(data_dict):
             validation_func(field_data)
         except ValidationError as e:
             # If the validation function raises a ValidationError, return an error message
-            # The error message includes the name of the field and the error message from the exception
+            # The error message includes the name of the field and the custom error message from the staticmethods validations function
             return jsonify({'error': f"{field_name}: {str(e)}"}), 400
 
 #refractor the format of return responses in my routes since they all have to be consistently json.

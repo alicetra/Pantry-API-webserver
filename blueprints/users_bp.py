@@ -12,45 +12,47 @@ from setup import app, bcrypt, db
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
 # This function processes a data dictionary and normalizes all field values to lowercase,
-# except for those fields specified in case_sensitive_fields, whose values are left as they are.
+# except for the password fields as for security reason you want that to be case_sensitive_fields.
+# This is to provide consistency in the input format of the database and remove duplication.
 def process_and_normalize_data(data, fields):
     case_sensitive_fields = ['password', 'old_password', 'new_password', 'confirm_password']
     return {field: data[field] if field in case_sensitive_fields else data[field].lower() for field in fields}
 
 @users_bp.route("/register", methods=["POST"])
 def register():
-    # Create a new instance of the RegisterSchema. This schema is used to validate the incoming request data.
+    # Create a new instance of the RegisterSchema. The schema is used to validate the incoming request data against.
     schema = RegisterSchema()
     # Validate the incoming request data against the schema. The 'request' object is a global Flask object that holds the current HTTP request data.
     data = validate_data(request, schema)
-    # If the data is a tuple, it means that validation failed and the function returned an error response. So, return this response.
+    # If the data is a tuple, it means that validation failed and relevant error message will be immediately return based on the schema error handling and requirement.
     if isinstance(data, tuple): 
         return data
 
-    # Get the keys of the schema fields. These are the fields that we expect in the request data.
+    # Get the keys of the schema fields once everything has been validated and we ensured that the correct keys and data types have been provided.
     fields = schema.fields.keys()
     # Process and normalize the data. This function converts all field values to lowercase, except for certain fields like passwords.
     processed_data = process_and_normalize_data(data, fields)
 
-    # Check if the username already exists in the database. If it does, return an error response.
+    # Check if the username already exists in the database. If it does, return an error response and the rest of the code will not be executed.
     response = check_field(User, 'username', processed_data['username'], 'Username already taken. Please note that username are case-insentitive')
     if response:
         return response
 
-    # Check if the email already exists in the database. If it does, return an error response.
+    # Check if the email already exists in the database. If it does, return an error response and the rest of the code will not be executed.
     response = check_field(User, 'email', processed_data['email'], 'Email already taken')
     if response:
         return response
 
-    # Prepare the data dictionary for creating a new User instance.
+    # Prepare the keys into data dictionary for validation against staticmethod.
     data_dict = prepare_data_dict(data, fields, User)
 
-    # Validate the fields of the new User instance. If any field is invalid, return an error response.
+    # Validate the fields of the new User instance. If any field is invalid, return an error response and the rest of the code will not be executed.
+    #This will check if provided input pass our requirements in our staticmethod such as password requirements.
     response = validate_fields(data_dict)
     if response:
         return response
 
-    # Create a new User instance with the processed data. Harcoding the security question, meaning all users will have the same security question.
+    # Create a new User instance with the processed data and validated data. Harcoding the security question, meaning all users will have the same security question.
     user = User(username=processed_data['username'], email=processed_data['email'], security_question="What is your favourite childhood book")
   
     # Set the password and security answer for the user.
@@ -78,7 +80,7 @@ def login():
     # it's retrieving a 'User' object where the 'username' field matches  the processed input field username
     user = get_model_by_field(User,'username', processed_data['username'])
 
-    # Check if the user exists and if the password is correct. If not, return an error response with the message 'Invalid username or password'.
+    # Check if the user exists and if the password is correct. If not,  immediately return an error response with the message 'Invalid username or password' and rest of our code will not be executed. 
     response = check_match(user and user.check_password(processed_data['password']), True, 'Invalid username or password')
     if response:
         return response
@@ -101,7 +103,7 @@ def logout():
     jti = get_jwt()["jti"]  
     # Create a new RevokedToken object with the JTI of the current token
     revoked_token = RevokedToken(jti=jti)
-    #  Add the revoked token to the database
+    #  Add the revoked token to the database so that once user log out, they cannot access protected routes with their revoked token.
     revoked_token.add()
     username = get_jwt_identity()
     if username:
