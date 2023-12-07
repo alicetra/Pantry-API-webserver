@@ -15,7 +15,7 @@ def check_duplicate_keys(pairs):
     return dict(pairs)
 
 
-#Initial validation of request data.
+
 def validate_data(request, schema):
     # Get the raw JSON data from the request
     raw_json = request.get_data(as_text=True)
@@ -28,16 +28,16 @@ def validate_data(request, schema):
 
     # If there were no duplicate keys, get the JSON data from the request
     data = request.get_json()
-    # Validate the data against the provided schema
+    # validates the structure and types of the raw JSON data from the request against the schema.
     errors = schema.validate(data)
     if errors:
         return jsonify(errors), 400
     # If the data is valid, return it
     return data
 
-#Prepares data for my static method validation post initial validation.
+#Prepares data for my static method validation 
 def prepare_data_dict(data, fields, model):
-    # Define a dictionary that maps fields which are not defined in the model to  their corresponding validation methods
+    # Define a dictionary that maps fields which are not defined in the model to their corresponding validation methods
     validation_methods = {
         'new_password': 'password',
         'new_security_answer': 'security_answer',
