@@ -13,7 +13,9 @@ class User(db.Model):
     password_hash = db.Column(db.Text(), nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False) 
     security_question = db.Column(db.Text(), nullable=False)
-    security_answer = db.Column(db.Text(), nullable=False)  
+    security_answer = db.Column(db.Text(), nullable=False) 
+    # This line connects the User to the Pantry model. This establishes a bi-directional relationship between the User and Pantry models.
+    # This means we can easily access the related Pantry object from a User object, and vice versa.
     pantry = db.relationship('Pantry', back_populates='user', uselist=False)
 
     # This method uses the bcrypt library's generate_password_hash function to create a hashed version of the input string.
