@@ -50,8 +50,7 @@ def prepare_data_dict(data, fields, model):
         if field in data:
             # Use the dictionary to determine the validation method
             validation_method = validation_methods.get(field, field)
-            value = data[field].lower() if isinstance(data[field], str) and field not in ['new_password','password'] else data[field]
-            data_dict[field] = (getattr(model, f"validate_{validation_method}"), value)
+            data_dict[field] = (getattr(model, f"validate_{validation_method}"), data[field])
     return data_dict
 
 #Performs the static method validation on prepared data.
@@ -63,6 +62,10 @@ def validate_fields(data_dict):
         try:
             # Try to validate the data using the validation function
             validation_func(field_data)
+        except ValidationError as e:
+            # If the validation function raises a ValidationError, return an error message
+            # The error message includes the name of the field and the error message from the exception
+            return jsonify({'error': f"{field_name}: {str(e)}"}), 400
 
 
 #refractor the format of return responses in my routes since they all have to be consistently json.
