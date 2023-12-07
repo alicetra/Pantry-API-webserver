@@ -1,7 +1,8 @@
 from setup import db
-from flask_sqlalchemy import SQLAlchemy
+from marshmallow import Schema, fields, INCLUDE, ValidationError
 from datetime import datetime
-import re
+from .base_schema import BaseSchema
+
 
 class Pantry(db.Model):
     __tablename__ = 'pantries'
@@ -11,8 +12,6 @@ class Pantry(db.Model):
     #This line connect the Pantry to the User model. This establish a bi-directional relationship between the User and Pantry models. 
     #This means we  can easily access the related User object from a Pantry object, and vice versa.
     user = db.relationship('User', back_populates='pantry')
-    #This line connect the Pantry to the PantryItem  model. This establish a bi-directional relationship between the Pantry and PantryItem models. 
-    #This means we  can easily access the related Pantryitem object from a Pantry object, and vice versa.
     items = db.relationship('PantryItem', back_populates='pantry')
 
 class PantryItem(db.Model):
@@ -23,8 +22,6 @@ class PantryItem(db.Model):
     used_by_date = db.Column(db.Text(), nullable=False)  
     count = db.Column(db.Integer, nullable=False)
     run_out_time = db.Column(db.DateTime, nullable=True)
-    #This line connect the Pantry to the PantryItem  model. This establish a bi-directional relationship between the Pantry and PantryItem models. 
-    #This means we  can easily access the related Pantryitem object from a Pantry object, and vice versa.
     pantry = db.relationship('Pantry', back_populates='items')
 
     # Benefits of using static methods for validation:
@@ -47,7 +44,7 @@ class PantryItem(db.Model):
         if not all(word.isalpha() for word in item.split()):
             raise ValidationError("Item must be a string containing only alphabetic characters and spaces.")
 
-     # This staticmethod validates the used_by_date. It checks if the date is in the format 'dd-mm-yyyy'
+    # This staticmethod validates the used_by_date. It checks if the date is in the format 'dd-mm-yyyy'
     @staticmethod
     def validate_used_by_date(date):
         try:
@@ -55,3 +52,42 @@ class PantryItem(db.Model):
         except ValueError:
             raise ValidationError("used_by_date must be a string in the format 'dd-mm-yyyy'")
 
+
+# In some routes some fields are not required but in others they are,
+# having a blanket schema would remove the approriate requirement fields and error handling message for each routes which I coded into the baseschema validation.
+
+
+class BaseItemSchema(BaseSchema):
+    #Serialization/deserialization and validation of the data. 
+    #Might seem reduntant to define the type again as the type is define in the model for what is accepted input. 
+    #However putting validating in the schema will allow for  validation error to be raise before the data is processed or stored.
+    item = fields.Str(required=True)
+
+    class Meta:
+        #This line allows for unknown fields and my custom validation in BaseSchema to takes over, providing my specific error message.
+        #Else a generic message will be provided as " "Unknown field."
+        unknown = INCLUDE
+        fields = ("item",)
+
+class PantryItemSchema(BaseItemSchema):
+    used_by_date = fields.Str(required=True)
+    count = fields.Int(required=True) 
+
+    class Meta:
+        unknown = INCLUDE
+        # BaseItemSchema.Meta.fields refers to the 'fields' attribute in the Meta class inside BaseItemSchema. 
+        # It's a tuple containing the field names ("item") defined in BaseItemSchema.
+        # Here, we're creating a new tuple that includes the fields from BaseItemSchema plus "used_by_date" and "count". This is done to adhered to D.R.Y
+        fields = BaseItemSchema.Meta.fields + ("used_by_date", "count")
+
+class DeletePantryItemSchema(BaseItemSchema):
+    pass
+
+class UpdatePantryItemSchema(BaseItemSchema):
+    # the fields are not required since I want the client to decide what fields to update. They might only want to update one field only. 
+    used_by_date = fields.Str()
+    count = fields.Int()
+
+    class Meta:
+        unknown = INCLUDE
+        fields = BaseItemSchema.Meta.fields + ("used_by_date", "count")
