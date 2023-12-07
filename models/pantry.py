@@ -10,7 +10,7 @@ class Pantry(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
     name = db.Column(db.Text(), nullable=False)
     #This line connect the Pantry to the User model. This establish a bi-directional relationship between the User and Pantry models. 
-    #This means we  can easily access the related User object from a Pantry object, and vice versa.
+    #This means we can easily access the related User object from a Pantry object, and vice versa.
     user = db.relationship('User', back_populates='pantry')
     items = db.relationship('PantryItem', back_populates='pantry')
 

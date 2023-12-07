@@ -10,7 +10,7 @@ class BaseSchema(ma.Schema):
     @validates_schema
     # The **kwargs in the method signature is used to capture any additional keyword arguments that are passed to the method.
     # By including **kwargs in the method signature, we're telling Python to capture all additional keyword arguments, even if they're not explicitly listed in the method signature.
-    # This can help prevent TypeErrors when an unexpected keyword argument is passed to the method
+    # This can is necessary to prevent TypeErrors when an unexpected keyword argument is passed to the method
     def validate_unknown_fields(self, data, **kwargs):
         unknown = set(data) - set(self.fields)
         if unknown:
