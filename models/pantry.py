@@ -9,8 +9,8 @@ class Pantry(db.Model):
     pantry_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
     name = db.Column(db.Text(), nullable=False)
-    #This line connect the Pantry to the User model. This establish a bi-directional relationship between the User and Pantry models. 
-    #This means we can easily access the related User object from a Pantry object, and vice versa.
+    # This line connect the Pantry to the User model. This establish a bi-directional relationship between the User and Pantry models. 
+    # This means we can easily access the related User object from a Pantry object, and vice versa.
     user = db.relationship('User', back_populates='pantry')
     items = db.relationship('PantryItem', back_populates='pantry')
 
@@ -58,14 +58,14 @@ class PantryItem(db.Model):
 
 
 class BaseItemSchema(BaseSchema):
-    #Serialization/deserialization and validation of the data. 
-    #Might seem reduntant to define the type again as the type is define in the model for what is accepted input. 
-    #However putting validating in the schema will allow for  validation error to be raise before the data is processed or stored.
+    # Serialization/deserialization and validation of the data. 
+    # Might seem reduntant to define the type again as the type is define in the model for what is accepted input. 
+    # However putting validating in the schema will allow for  validation error to be raise before the data is processed or stored.
     item = fields.Str(required=True)
 
     class Meta:
-        #This line allows for unknown fields and my custom validation in BaseSchema to takes over, providing my specific error message.
-        #Else a generic message will be provided as " "Unknown field."
+        # This line allows for unknown fields and my custom validation in BaseSchema to takes over, providing my specific error message.
+        # Else a generic message will be provided as " "Unknown field."
         unknown = INCLUDE
         fields = ("item",)
 

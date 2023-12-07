@@ -4,7 +4,7 @@ from models.user import User
 from models.pantry import Pantry, PantryItem
 from models.authorization import RevokedToken
 
-# Create a new blueprint named 'db'. This allows us to organize our Flask application into smaller and reusable applications.
+# Create a new blueprint named 'db'. This allows us to organize Flask application into smaller and reusable applications.
 db_commands = Blueprint('db', __name__)
 
 # Register a new command 'create' that can be run in the Flask application's command line interface (CLI).

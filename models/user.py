@@ -60,19 +60,19 @@ class User(db.Model):
             raise ValidationError("Password must contain at least one number.")
         elif not re.search(r'\W', password):
             raise ValidationError("Password must contain at least one special character.")
-        #This line prevent a password with spaces at any point in of the string to be accepted as it would still pass the special character check without this line.
-        #Decided to keep this as a seperate requirement instead of changing the special character code to make the requirement of a password explicit.
+        # This line prevent a password with spaces at any point in of the string to be accepted as it would still pass the special character check without this line.
+        # Decided to keep this as a seperate requirement instead of changing the special character code to make the requirement of a password explicit.
         elif ' ' in password:
             raise ValidationError("Password must not contain spaces.")
 
-    #This staticmethod validates the username. It checks if the username only contains alphanumeric characters.
+    # This staticmethod validates the username. It checks if the username only contains alphanumeric characters.
     @staticmethod
     def validate_username(username):
         if not re.match('^[a-zA-Z0-9]*$', username):
             raise ValidationError("Username can only contain alphanumeric characters. Special character and spaces are not accepted.")
 
-    #This staticmethod validates the email based on several conditions such as length and format.
-    #It also normalizes the email address by converting the domain part to lowercase.
+    # This staticmethod validates the email based on several conditions such as length and format.
+    # It also normalizes the email address by converting the domain part to lowercase.
     @staticmethod
     def validate_email(email):
         if len(email) > 320:
@@ -86,19 +86,19 @@ class User(db.Model):
         
         return email
 
-    #This staticmethod validates the security answer. It checks if the security answer only contains alphabetic characters.
+    # This staticmethod validates the security answer. It checks if the security answer only contains alphabetic characters.
     @staticmethod
     def validate_security_answer(security_answer):
         if not security_answer.isalpha():
             raise ValidationError("Security answer must only contain alphabetic characters. Special character and spaces are not accepted. Please note that answer will be case-insentitive")
 
-#This event listener decorator means that the function that follows will be executed after a new User record is inserted into the database. 
-#Since I want all users to have one pantry it made sense to automatically create one. 
+# This event listener decorator means that the function that follows will be executed after a new User record is inserted into the database. 
+# Since I want all users to have one pantry it made sense to automatically create one. 
 @event.listens_for(User, 'after_insert')
-#connection is the active database connection, and target is the actual User table that was just inserted. 
-#SQLAlchemy will still pass three arguments when the after_insert event is triggered hence why by convention I used _ as a placeholder for a parameter that is not used/needed.
+# connection is the active database connection, and target is the actual User table that was just inserted. 
+# SQLAlchemy will still pass three arguments when the after_insert event is triggered hence why by convention I used _ as a placeholder for a parameter that is not used/needed.
 def create_pantry(_, connection, target):
-    #This line creates a new Pantry object associated with the newly created User. The name is set to a string that includes the username of the User
+    # This line creates a new Pantry object associated with the newly created User. The name is set to a string that includes the username of the User
     pantry = Pantry(user_id=target.id, name=f"{target.username}'s Pantry")
-    #A commit is not needed here because Flask-SQLAlchemy automatically commits the session at the end of the request. Adding a commit result in a ResourceClosedError 
+    # A commit is not needed here because Flask-SQLAlchemy automatically commits the session at the end of the request. Adding a commit result in a ResourceClosedError 
     db.session.add(pantry)
