@@ -14,6 +14,7 @@ def check_duplicate_keys(pairs):
         # If there are no duplicate keys, convert the pairs back into a dictionary and return it
     return dict(pairs)
 
+#validate json data against schemas 
 def validate_data(request, schema):
     # Get the raw JSON data from the request
     raw_json = request.get_data(as_text=True)
@@ -66,7 +67,6 @@ def validate_fields(data_dict):
             # If the validation function raises a ValidationError, return an error message
             # The error message includes the name of the field and the error message from the exception
             return jsonify({'error': f"{field_name}: {str(e)}"}), 400
-
 
 #refractor the format of return responses in my routes since they all have to be consistently json.
 def create_response(message, status_code, **kwargs):
