@@ -7,6 +7,8 @@ jwt = JWTManager()
 
 # This function is a callback for the Flask-JWT-Extended library.
 # It's decorated with 'jwt.token_in_blocklist_loader', which means it's used to check if a JWT token is in a blocklist (or "blacklist").
+# If my route have the @jwt_required() decorator it will automatically call the function decorated with @jwt.token_in_blocklist_loader to check if the token is in the blacklist.
+# So I dont have to explicitly call the token_in_blocklist loader above my route as long as I got @jwt_required()
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_payload):
     jti = jwt_payload["jti"]

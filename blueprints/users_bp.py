@@ -2,10 +2,10 @@ from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from datetime import timedelta
 from models.user import User
-from models.authorization import RegisterSchema, LoginSchema, RevokedToken
+from models.authorization import RegisterSchema, LoginSchema, RevokedToken,ForgetPasswordSchema,ResetPasswordSchema,SecurityAnswerSchema
 from utils import validate_data, check_field, prepare_data_dict, validate_fields, create_response, get_model_by_field, check_match
 from setup import app, bcrypt, db
-
+from jwt_config import get_current_user
 
 # 'url_prefix' is a path to prepend to all URLs associated with the Blueprint.
 # In this case, all routes defined on the 'users_bp' Blueprint will have '/users' prepended to them. Adhering to D.R.Y 
