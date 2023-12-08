@@ -22,7 +22,8 @@ def process_and_normalize_data(data, fields):
 def register():
     # Create a new instance of the RegisterSchema. The schema is used to validate the incoming request data against.
     schema = RegisterSchema()
-    # Validate the incoming request data against the schema. The 'request' object is a global Flask object that holds the current HTTP request data.
+    # Validate the incoming request data against the schema. The 'request' object is a global Flask object that holds the current HTTP request data. 
+    #This step check that all required fields have been provided, required fields only. It checks that the data type is correct too.
     data = validate_data(request, schema)
     # If the data is a tuple, it means that validation failed and relevant error message will be immediately return based on the schema error handling and requirement.
     if isinstance(data, tuple): 
@@ -47,7 +48,7 @@ def register():
     data_dict = prepare_data_dict(data, fields, User)
 
     # Validate the fields of the new User instance. If any field is invalid, return an error response and the rest of the code will not be executed.
-    #This will check if provided input pass our requirements in our staticmethod such as password requirements.
+    #This will check if provided input pass our requirements in our staticmethod such as password requirements ect...
     response = validate_fields(data_dict)
     if response:
         return response
@@ -97,15 +98,167 @@ def login():
     return response, 200
 
 @users_bp.route('/logout', methods=['POST'])
+#This is a jwt required route since you  shouldn't be able to can't log out if you aren't log in.
 @jwt_required()
 def logout():
     # Get the JTI for the current token
     jti = get_jwt()["jti"]  
     # Create a new RevokedToken object with the JTI of the current token
     revoked_token = RevokedToken(jti=jti)
-    #  Add the revoked token to the database so that once user log out, they cannot access protected routes with their revoked token.
+    # Add the revoked token to the database so that once user log out, they cannot access protected routes with their revoked token.
     revoked_token.add()
+    # Get the username of the current JTI
     username = get_jwt_identity()
     if username:
         return create_response(f'User {username} logged out successfully', 200)
 
+
+@users_bp.route("/forget_password", methods=['POST'])
+# This is not a jwt required route as if you forgot your password, you logically can't log in. 
+# This is the provided option to access your account if that is the case.
+def forget_password():
+    schema = ForgetPasswordSchema()
+    data = validate_data(request, schema)
+    if isinstance(data, tuple): 
+        return data
+
+    fields = schema.fields.keys()
+    processed_data = process_and_normalize_data(data, fields)
+
+    user = get_model_by_field(User,'username', processed_data['username'])
+
+    # Check if the user object is None or if the user's security answer doesn't match the processed data's security answer. 
+    #Having the option to verified that this your account through a security answer if you forgot your password is a widely used standard.
+    if user is None or not user.check_security_answer(processed_data['security_answer']):
+        # If either condition is true, imediatelly return a response with a message 'Invalid username or security answer' and a 401 status code, 
+        # This stops the execution of the rest of the code, effectively preventing the the reset of password due to failed identity verification.
+        return create_response('Invalid username or security answer', 401)
+
+    #Note that I am doing the staticmethod validations after the code is making sure that user exist and have sucessfully provided their security answer.
+    #If they can not identify themselves there is no point to validate new_password for the requirements of a password
+    # prior to that stage since they won't be able to change their password. This avoid unecessary computations.
+    data_dict = prepare_data_dict(processed_data, fields, User)
+    
+    response = validate_fields(data_dict)
+    if response:
+        return response
+
+    # Check if the new password matches the confirm password
+    response = check_match(processed_data['new_password'], processed_data['confirm_password'], 'New password and confirm password do not match')
+    # If they don't match, imediatelly return a response indicating the mismatch.
+    # The rest of the code won't be executed.
+    if response:
+        return response
+
+    # Check if the new password is different from the existing password
+    response = check_match(user.check_password(processed_data['new_password']), False, 'New password must be different from the existing password')
+    # If the new password is the same as the existing password, imediatelly return a response indicating that the new password must be different.
+    # The rest of the code won't be executed.
+    if response:
+        return response
+
+    #if it passed all the checks and we are executed this code. It means that user can sucessfully reset their password. 
+    # Set the user's password to the new password
+    user.set_password(processed_data['new_password'])  
+    # Commit the changes to the database
+    db.session.commit()  
+    # Return a response indicating that the password reset was successful
+    return create_response('Password reset successfully', 200)
+
+@users_bp.route("/reset_password", methods=['POST'])
+#This a jwt required route, alike above route this is for changing your password when you are login.
+#This is not when you forgot your password but just want to change it. This a common route per industry standard.
+@jwt_required()
+def reset_password():
+    schema = ResetPasswordSchema()
+    data = validate_data(request, schema)
+    if isinstance(data, tuple): 
+        return data
+
+    user = get_current_user()
+
+    fields = schema.fields.keys()
+    # You might ask yourself why we need to normalised the data and converts all field values to lowercase if all password fields are case insentive,
+    # its because user is a required field and that field is case-insentive.
+    processed_data = process_and_normalize_data(data, fields)
+
+    # Check if the old password provided by the user matches the existing password. This is to add that extra layer of identification before changing a password.
+    # This step is crucial to prevent unauthorized password changes in scenarios where a user's account is left logged in and unattended (idle). 
+    # Without this check, anyone with access to an idle session could change the password, potentially compromising the account's security.
+    response = check_match(user.check_password(processed_data['old_password']), True, 'Invalid old password')
+    # If the old password is invalid, immediately return a response indicating the mismatch.
+    # This stops the execution of the rest of the code, effectively preventing the the reset of  password due to failed identity verification.
+    if response:
+        return response
+
+    data_dict = prepare_data_dict(data, fields, User)
+
+    response = validate_fields(data_dict)
+    if response:
+        return response
+
+    # Check if the new password matches the confirm password.
+    response = check_match(processed_data['new_password'], processed_data['confirm_password'], 'New password and confirm password do not match')
+    # If they don't match, immediately return a response indicating the mismatch.
+    # The rest of the code won't be executed.
+    if response:
+        return response
+
+    # Check if the new password is different from the old password
+    response = check_match(user.check_password(processed_data['new_password']), False, 'New password must be different from old password')
+    # If the new password is the same as the old password, immediately return a response indicating that the new password must be different.
+    # The rest of the code won't be executed.
+    if response:
+        return response
+
+    user.set_password(processed_data['new_password'])
+    db.session.commit()
+    return create_response('Password reset successfully', 200)
+
+@users_bp.route("/reset_security_answer", methods=['POST'])
+##This a jwt required route, this is for changing your security answer when you are login.
+# This a common option route per industry standard. It's important to provide user an option to change their identification details.
+@jwt_required()
+def reset_security_answer():
+    schema = SecurityAnswerSchema()
+    data = validate_data(request, schema)
+    if isinstance(data, tuple): 
+        return data
+
+    user = get_current_user()
+
+    fields = schema.fields.keys()
+    processed_data = process_and_normalize_data(data, fields)
+
+    # Check if the old security answer provided by the user matches the existing security answer. 
+    # This step is crucial to prevent unauthorized  security answer changes in scenarios where a user's account is left logged in and unattended (idle). 
+    # Without this check, anyone with access to an idle session could change the password, potentially compromising the account's security.
+    response = check_match(user.check_security_answer(processed_data['old_security_answer']), True, 'Invalid old security answer')
+    # If the old security answer is invalid (i.e., it does not match the existing security answer), the function immediately returns a response indicating the mismatch.
+    # This stops the execution of the rest of the code, effectively preventing the security answer change due to failed identity verification.
+    if response:
+        return response
+
+    data_dict = prepare_data_dict(processed_data, fields, User)
+
+    response = validate_fields(data_dict)
+    if response:
+        return response
+
+    # Check if the new security answer matches the confirm security answer.
+    response = check_match(processed_data['new_security_answer'], processed_data['confirm_security_answer'], 'New security answer and confirm security answer do not match')
+    # If they don't match, immediately return a response indicating the mismatch.
+    # The rest of the code won't be executed.
+    if response:
+        return response
+
+    # Check if the new security answer is different from the old security answer.
+    response = check_match(user.check_security_answer(processed_data['new_security_answer']), False, 'New security answer must be different from old security answer. Please note that security answer are case-insentive')
+    # If the new security answer is the same as the old security answer, immediately return a response indicating that the new security answer must be different.
+    # The rest of the code won't be executed.
+    if response:
+        return response
+
+    user.set_security_answer(processed_data['new_security_answer'])
+    db.session.commit()
+    return create_response('Security answer reset successfully', 200)
