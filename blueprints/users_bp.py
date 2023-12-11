@@ -14,6 +14,7 @@ users_bp = Blueprint('users', __name__, url_prefix='/users')
 # This function processes a data dictionary and normalizes all field values to lowercase,
 # except for the password fields as for security reason you want that to be case_sensitive_fields.
 # This is to provide consistency in the input format of the database and remove duplication.
+# Refractoring this in a function ensures consistent application of rules, simplifies code maintenance, and enhances readability
 def process_and_normalize_data(data, fields):
     case_sensitive_fields = ['password', 'old_password', 'new_password', 'confirm_password']
     return {field: data[field] if field in case_sensitive_fields else data[field].lower() for field in fields}
@@ -175,6 +176,7 @@ def reset_password():
     if isinstance(data, tuple): 
         return data
 
+    # This line retrieves the current user object.
     user = get_current_user()
 
     fields = schema.fields.keys()

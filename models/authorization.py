@@ -19,7 +19,7 @@ class RevokedToken(db.Model):
     @classmethod
     # Query the database for a token with the provided jti
     def is_jti_blacklisted(cls, jti):
-        # .scalar() returns the first result of the query as a Python object, or None if there are no results
+        # .scalar() returns the result of the query as a Python object, or None if there are no results
         query = cls.query.filter_by(jti=jti).scalar()
          # Return True if a token was found (i.e., the token is blacklisted), and False otherwise
         return bool(query)
