@@ -2,9 +2,10 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 from datetime import datetime
 from jwt_config import get_current_user
-from models.pantry import PantryItem, PantryItemSchema
-from utils import validate_data, validate_fields, check_match, prepare_data_dict, create_response
+from models.pantry import PantryItem, PantryItemSchema, DeletePantryItemSchema, UpdatePantryItemSchema
+from utils import validate_data, validate_fields, check_match, prepare_data_dict, create_response, check_no_change
 from setup import db
+from marshmallow import ValidationError
 
 pantry_bp = Blueprint('pantry', __name__, url_prefix='/pantry')
 
@@ -42,7 +43,7 @@ def get_pantry():
         return create_response([pantry_item_to_dict(item) for item in pantry_items], 200)
     # If there are no items in the pantry.
     else:
-        # it returns a 200 status code and a message indicating that the pantry is empty. The route is still sucessfull hence the 200 status. 
+        # it returns a 200 status code and a message indicating that the pantry is empty. The route  purpose of displaying the pantry is still sucessfull hence the 200 status. 
         # It just returns an empty pantry which is correct.
         return create_response("Pantry is currently empty", 200)
 
@@ -124,3 +125,38 @@ def post_pantry_item():
     # This line commits the changes to the database. This saves the new item in the database.
     db.session.commit()
     return create_response("Item added to the pantry", 201)
+
+
+@pantry_bp.route("/item", methods=["DELETE"])
+# This route is a jwt required one since I only want the user to be allowed to delete their own pantry item and no one else.
+@jwt_required()
+def delete_pantry():
+    schema = DeletePantryItemSchema()
+    data = validate_data(request, schema)
+    if isinstance(data, tuple): 
+        return data
+
+    user = get_current_user()
+
+    normalized_item = normalize_item(data['item']) 
+
+    pantry = user.pantry 
+
+    # This line searches for the  item in the pantry's items. If it exists, it will be returned; otherwise, None will be returned.
+    pantry_item = next((item for item in pantry.items if item.item == normalized_item), None)
+    # if item exist
+    if pantry_item:
+        # this line will delete it from the database.
+        db.session.delete(pantry_item)
+        # This line commits the changes to the database.
+        db.session.commit()
+         # This line returns a response indicating that the item has been deleted, along with a 200 status code.
+        return create_response(f"{normalized_item} has been deleted", 200)
+    # else if item return none meaning item doesnt exist
+    # this line returns a response indicating that the item does not exist in the database.
+    # the 400 status code is returned when the item does not exist in the database, 
+    # which could be considered as an invalid user input - the user is trying to delete an item that doesn’t exist.
+    # returning a 400 status code makes it clear that the requested operation of this route (which is for deleting an item) has failed.
+    else:
+        return create_response(f"{normalized_item} doesn't exist in the database", 400)
+
