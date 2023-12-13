@@ -10,6 +10,7 @@ from marshmallow import ValidationError
 pantry_bp = Blueprint('pantry', __name__, url_prefix='/pantry')
 
 # This function takes an item as input and converts it to lowercase. This ensure consistency in the database,I wanted item to be case-insensitive.
+# I needed to strip since in my delete and put/patch route items are defined in the URL. In a URL, a space is typically replaced with %20
 # Refactoring normalize_item to be the single source of item normalization ensures consistent application of rules, simplifies code maintenance, and enhances readability.
 def normalize_item(item):
     normalized_item = item.lower().strip()
