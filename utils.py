@@ -4,13 +4,25 @@ from models.user import User
 from models.pantry import PantryItem 
 import json
 
+#refractor the format of return responses in my routes since they all have to be consistently json.
+# The **kwargs argument allows for optional keyword arguments to be passed into the function.
+# These arguments are then added to the response dictionary.
+# For example, when a new user is registered, I want to return their username and email in the response.
+# This can be done through user={'username': processed_data['username'], 'email': processed_data['email']} as a keyword argument when calling this function.
+# The **kwargs argument allows for this flexibility.
+def create_response(message, status_code, **kwargs):
+    response = {'message': message}
+    response.update(kwargs)
+    return jsonify(response), status_code
+
+
 def check_duplicate_keys(pairs):
     keys = [key for key, value in pairs]
     # if the length of the list of keys is not equal to the length of the set of keys, it means there are duplicates
     if len(keys) != len(set(keys)):
         # If there are duplicate keys, return an error message as a JSON response
         # The status code 400 indicates a 'Bad Request' error
-        return jsonify({"error": "You have put some fields twice in your json file. Data could not be registered."}), 400
+        return create_response({"error": "You have put some fields twice in your json file. Data could not be registered."}, 400)
         # If there are no duplicate keys, convert the pairs back into a dictionary and return it
     return dict(pairs)
 
@@ -30,6 +42,9 @@ def validate_data(request, schema):
     # validates the structure and types of the raw JSON data from the request against the schema.
     errors = schema.validate(data)
     if errors:
+        # The 'create_response' function cannot be used here because it expects a string message and optional keyword arguments.
+        # However, 'errors' is a dictionary where each key-value pair represents a field that failed validation and its corresponding error message.
+        # Therefore, we need to return the 'errors' dictionary directly, converted to a JSON response using 'jsonify'.
         return jsonify(errors), 400
     # If the data is valid, return it
     return data
@@ -66,25 +81,19 @@ def validate_fields(data_dict):
         except ValidationError as e:
             # If the validation function raises a ValidationError, return an error message
             # The error message includes the name of the field and the custom error message from the staticmethods validations function
-            return jsonify({'error': f"{field_name}: {str(e)}"}), 400
-
-#refractor the format of return responses in my routes since they all have to be consistently json.
-def create_response(message, status_code, **kwargs):
-    response = {'message': message}
-    response.update(kwargs)
-    return jsonify(response), status_code
+            return create_response(f"{field_name}: {str(e)}", 400)
 
 # Checks if two values match. If they don't, returns an error message.
 def check_match(value1, value2, error_message):
     if value1 != value2:
-        return jsonify({'error': error_message}), 400
+        return create_response({'error': error_message}, 400)
     else:
         return None
 
 #Checks if two values are the same. If they are, returns an error message.
 def check_no_change(value1, value2, error_message):
     if value1 == value2:
-        return jsonify({'error': error_message}), 400
+        return create_response({'error': error_message}, 400)
     else:
         return None
 
