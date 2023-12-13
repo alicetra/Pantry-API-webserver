@@ -263,3 +263,59 @@ def get_runout_items():
         # this line returns a response indicating that there are no out of stock items, along with a 200 status code.
     else:
         return create_response("You have no out of stock items", 200)
+    
+# The "<int:days>" in the route is a dynamic part of the URL. 
+# Flask's routing system allows for type specification in the dynamic parts of routes. 
+# By specifying "int", we're telling Flask that this part of the route should be an integer. 
+# If a request comes in with a non-integer value in this part of the URL, Flask will automatically respond with a 404 Not Found error. 
+# This means we don't need to manually handle the error case where a non-integer is provided, Flask does it for us.
+@pantry_bp.route("/itemusedby/<int:days>", methods=["GET"])
+# This route is a jwt required one since I only want the user to be allowed to grab the items in their pantry that need to be used within a certain number of days.
+@jwt_required()
+def get_items_used_by(days):
+    user = get_current_user()
+    # This line sets the current date.
+    now = datetime.now().date()
+    # This line initializes an empty list to store the items to be used.
+    items_to_use = []
+     # This line iterates over each item in the user's pantry.
+    for item in user.pantry.items:
+         # This line converts the used-by date of the item to a date object.
+        item_date = convert_used_by_date_to_date(item)
+         # This line calculates the difference in days between the item's used-by date and the current date.
+        diff_days = (item_date - now).days
+        # This line checks if the item needs to be used within the specified number of days.
+        if diff_days >= 0 and diff_days <= days:
+            # If the item needs to be used within the specified number of days, this line adds the item to the items_to_use list.
+            items_to_use.append(item)
+    # This line checks if there are any items to be used within the specified number of days.
+    if items_to_use:
+        # If there are items to be used within the specified number of days, this line returns a response with a list of these items,
+        # each in their dictionary format, along with a 200 status code.
+        return create_response([pantry_item_to_dict(item) for item in items_to_use], 200)
+    else:
+        # If there are no items to be used within the specified number of days, this line returns a response indicating that there are no such items,
+        # along with a 200 status code.
+        return create_response(f"You have no items to be used in the next {days} days", 200)
+
+
+@pantry_bp.route("/itemexpired", methods=["GET"])
+# This route is a jwt required one since I only want the user to be allowed to grab the items in their pantry that have expired.
+@jwt_required()
+def get_expired_items():
+    user = get_current_user()
+    now = datetime.now().date()
+    # This line initializes an empty list to store the expired items.
+    expired_items = []
+    for item in user.pantry.items:
+        item_date = convert_used_by_date_to_date(item)
+        # This line checks if the item has expired.
+        if item_date < now:
+             # If the item has expired, this line adds the item to the expired_items list.
+            expired_items.append(item)
+     # This line checks if there are any expired items.
+    if expired_items:
+        return create_response([pantry_item_to_dict(item) for item in expired_items], 200)
+    else:
+        # If there are no expired items, this line returns a response indicating that there are no expired items, along with a 200 status code.
+        return create_response("You have no expired items", 200)
