@@ -1,6 +1,6 @@
 from flask_jwt_extended import JWTManager, get_jwt_identity
 from models.authorization import RevokedToken
-from flask import jsonify
+from utils import create_response
 from models.user import User 
 
 jwt = JWTManager()
@@ -16,19 +16,19 @@ def check_if_token_in_blacklist(jwt_header, jwt_payload):
 
 @jwt.revoked_token_loader
 def revoked_token_callback(jwt_header, jwt_payload):
-    return jsonify({'msg': 'Token has been revoked. New log in is required to access route purpose'}), 401
+    return create_response('Token has been revoked. New log in is required to access route purpose', 401)
     
 @jwt.expired_token_loader
 def handle_expired_token_callback(expired_token, payload):
-    return jsonify({'msg': 'The token has expired. New log in is required to access route purpose'}), 401
+    return create_response('The token has expired. New log in is required to access route purpose', 401)
 
 @jwt.invalid_token_loader
 def handle_invalid_token_callback(error):
-    return jsonify({'error': 'Invalid token. Please log in again.'}), 401
+    return create_response('Invalid token. Please log in again.', 401)
 
 @jwt.unauthorized_loader
 def handle_missing_token_callback(error):
-    return jsonify({'error': 'No user is currently logged in. Please input token in bearer header'}), 401
+    return create_response('No user is currently logged in. Please input token in bearer header', 401)
 
 # This function retrieves the current user based on the JWT token in the request.
 def get_current_user():
