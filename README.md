@@ -89,3 +89,506 @@ Key Benefits:
 
 In the context of Flask, SQLAlchemy is a popular ORM that integrates well with Flask applications. It provides all the benefits mentioned above, making it a good choice for Flask API applications.
 
+## All endpoints 
+
+### 1. List of all your pantry items 
+ This is the endpoint for getting all items in the pantry. When a GET request is made to this endpoint, it returns a list of all items in the current user’s pantry. If there is no items in the pantry, it will return a message to indicate so.
+
+```
+Endpoint:/pantry
+Request Verb: GET
+Required data:None 
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+```
+**Expected responses** <br>
+![Alt text](docs/pantryget1.JPG)<br>
+![Alt text](docs/pantryget2.JPG)
+
+### 2. List the data of a specific item in your pantry
+This endpoint is for getting a specific item from the pantry. When a GET request is made to this endpoint with an item name, it returns the details of that item if it exists in the current user’s pantry. If the item does not exist, it returns an error message.
+
+```
+Endpoint: /pantry/<item>
+Request Verb: GET
+Required data: item  
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+```
+
+**Expected responses**<br>
+![Alt text](docs/pantryget3.JPG)
+
+**Error handling**<br>
+![Alt text](docs/pantryget4.JPG)
+
+### 3. Adding an item to your pantry
+This endpoint is for adding a new item to the pantry. When a POST request is made to this endpoint with the item details in the request body, it validates the data and adds the item to the current user’s pantry if it does not already exist. If the item already exists, it returns an error message.
+
+```
+Endpoint: /pantry/item
+Request Verb: POST
+Required data: Item, use_by_date, count 
+Expected Response: 201 Created success
+Authentication: JWT token must be valid
+```
+
+**Expected Json input**
+```
+{
+	"count": 0,
+	"item": "TEST",
+	"used_by_date":"20-12-2023"
+}
+```
+
+**Expected response** <br>
+![Alt text](docs/pantrypost.JPG)
+
+**Error handling**<br>
+![Alt text](docs/pantrypost1.JPG)<br>
+![Alt text](docs/pantrypost2.JPG)<br>
+![Alt text](docs/pantrypost3.JPG)<br>
+![Alt text](docs/pantrypost4.JPG)<br>
+![Alt text](docs/pantrypost5.JPG)<br>
+![Alt text](docs/pantrypost6.JPG)<br>
+![Alt text](docs/pantrypost7.JPG)<br>
+![Alt text](docs/pantrypost9.JPG)
+
+
+### 4. Deleting item from your pantry
+This endpoint is for deleting items from the pantry. When a DELETE request is made to this endpoint with the names of the items to be deleted in the request body, it deletes the item from the current user’s pantry. If the item does not exist, it returns a message indicating so.
+
+```
+Endpoint: /pantry/item
+Request Verb: DELETE
+Required data: Item
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected Json input**
+```
+{
+    "item": "test"
+}
+
+```
+
+**Expected response** <br>
+![Alt text](docs/pantrydelete.JPG)
+
+**Error handling**<br>
+![Alt text](docs/pantrydelete1.JPG)<br>
+![Alt text](docs/pantrydelete2.JPG)<br>
+![Alt text](docs/pantrydelete3.JPG)<br>
+![Alt text](docs/pantrydelete4.JPG)
+
+### 5. Updating your item data
+This endpoint is for updating  an item in the pantry. When a PUT request is made in the request body, it first check that the item exist in the pantry. if item does indeed exist it validates the new data and updates the item data in the current user’s pantry. If the new data is the same as the old data, it returns a message indicating that the data needs to be different for an update to actually occur.
+
+```
+Endpoint: /pantry/item
+Request Verb: PUT
+Required data: Item and at least count or used_by_date or both
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected Json inputs**
+
+```
+
+    {
+        "item": "test",
+			"count": 1,
+			"used_by_date": "21-12-2023"
+    }
+```
+```
+    {
+        "item": "test",
+			"count": 1
+    }
+```
+```
+    {
+        "item": "test",
+			"used_by_date": "21-12-2023"
+    }
+```
+**Expected response** <br>
+![Alt text](docs/pantryput.JPG)<br>
+![Alt text](docs/pantryput1.JPG)<br>
+![Alt text](docs/pantryput2.JPG)
+
+**Error handling**<br>
+![Alt text](docs/pantryput3.JPG)<br>
+![Alt text](docs/pantryput4.JPG)<br>
+![Alt text](docs/pantryput5.JPG)<br>
+![Alt text](docs/pantryput6.JPG)<br>
+![Alt text](docs/pantryput7.JPG)<br>
+![Alt text](docs/pantryput8.JPG)<br>
+![Alt text](docs/pantryput10.JPG)
+
+### 6. List all the items that have ran out in your pantry
+When a GET request is made to this endpoint, it returns a list of all items in the current user’s pantry that have run out. If there is no item in your pantry whose count is 0, it will return a message to say so.
+
+```
+Endpoint: /pantry/itemrunout
+Request Verb: GET
+Required data:None 
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected response** <br>
+![Alt text](docs/pantryitemrunout.JPG)<br>
+![Alt text](docs/pantryitemrunout1.JPG)
+
+### 7.  List Items to be Used Within a Specified Timeframe
+This endpoint is designed to help users manage their pantry items more effectively. When a GET request is made to this endpoint with a specified number of days, it returns a list of items that need to be used within that timeframe. This is particularly useful for managing perishable items and reducing food waste. If there are no items to be used in the next specified number of days, it returns a message indicating so.
+
+```
+Endpoint: /pantry/itemusedby/<int:days>
+Request Verb: GET
+Required data: day(s) 
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected response** <br>
+![Alt text](docs/pantryitemusedby.JPG)<br>
+![Alt text](docs/pantryitemusedby1.JPG)
+
+### 8. Retrieve Expired Items in the Pantry
+This endpoint is for retrieving expired items in the pantry. When a GET request is made to this endpoint, it returns a list of items that have already expired. This feature is crucial for maintaining the quality and safety of the food in the pantry, as consuming expired items can lead to health issues. If there are no expired items, it returns a message indicating so.
+
+```
+Endpoint: /pantry/itemexpired
+Request Verb: GET
+Required data:None 
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+```
+
+**Expected response** <br>
+![Alt text](docs/pantryitemexpired1.JPG)<br>
+![Alt text](docs/pantryitemexpired.JPG)
+
+### 9. Register as a user
+This endpoint is for registering a new user. When a POST request is made to this endpoint with the user’s details (username, password, email, and security answer) in the request body, it validates the data, checks if the username and email already exist, and if not, creates a new user with the provided details. The password and security answer are hashed before being stored for security reasons. If the user is successfully registered, it returns a success message along with the username and email of the new user. Please note that when a user is created their pantry is also created through an event listener.
+
+```
+Endpoint: /users/register
+Request Verb: POST
+Required data: username, password, email, security_answer
+Expected Response: 201 Created success
+Authentication: none
+
+```
+
+**Expected Json inputs**
+```
+{
+	"email":"test6@gmail.com",
+	"password":"Testtest1!",
+	"username": "test4",
+	"security_answer": "test"
+}
+
+```
+**Expected response** <br>
+![Alt text](docs/userregister.JPG)
+
+
+**Error handling**<br>
+![Alt text](docs/userregister1.JPG)<br>
+![Alt text](docs/userregister2.JPG)<br>
+![Alt text](docs/userregister3.JPG)<br>
+![Alt text](docs/userregister4.JPG)<br>
+![Alt text](docs/userregister5.JPG)<br>
+![Alt text](docs/userregister6.JPG)<br>
+![Alt text](docs/userregister7.JPG)<br>
+![Alt text](docs/userregister8.JPG)<br>
+![Alt text](docs/userregister13.JPG)<br>
+![Alt text](docs/userregister9.JPG)<br>
+![Alt text](docs/userregister10.JPG)<br>
+![Alt text](docs/userregister11.JPG)<br>
+![Alt text](docs/userregister12.JPG)
+
+
+### 10. Login 
+This endpoint is for logging in a user. When a POST request is made to this endpoint with the username and password in the request body, it checks if the user exists and if the provided password matches the stored password for that user. If the login is successful, it generates an access token for the user and returns a success message.
+
+
+```
+Endpoint: /users/login
+Request Verb: POST
+Required data: username, password
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected Json inputs**
+
+```
+{
+	   "username": "test2",
+		"password": "Testtest1!"
+}
+
+```
+
+**Expected response** <br>
+![Alt text](docs/userlogin.JPG)
+
+**Error handling**<br>
+![Alt text](docs/userlogin1.JPG)<br>
+![Alt text](docs/userlogin2.JPG)<br>
+![Alt text](docs/userlogin3.JPG)<br>
+
+
+### 11. Logout  
+This endpoint is for logging out a user. When a POST request is made to this endpoint, it revokes the access token of the current user, effectively logging them out. If the logout is successful, it returns a success message.
+
+It is important to note that while the server does not maintain any state information between requests, it does store the tokens that have been revoked in a database. This is not a violation of the statelessness principle, as this information is not used to maintain a session state between requests, but rather to prevent the use of revoked tokens if user decide to log out and revoke their token.
+
+```
+Endpoint: /users/logout
+Request Verb: POST
+Required data: JWT token
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid. You cannot log out and revoke your token if you don't have a token to begin with.
+
+```
+
+**Expected response** <br>
+![Alt text](docs/userlogout.JPG)
+
+### 12. Forgot password 
+This endpoint is for users who have forgotten their password. When a POST request is made to this endpoint with the user’s username and security answer in the request body, it checks if the username exists and if the provided security answer matches the stored security answer for that user. If the security answer is correct, it validates the data and allows the user to set a new password. If the new password is the same as the existing password, it returns an error message. If the new password is successfully set, it returns a success message.
+
+```
+Endpoint: /users/forget_password
+Request Verb: POST
+Required data: username, new_password, confirm_password, security_answer 
+Expected Response: 200 request was successful
+Authentication: none 
+
+```
+
+**Expected Json inputs**
+
+```
+{
+    "username": "Test4",
+	"confirm_password":"Testtest2!" ,
+	"new_password":"Testtest2!",
+	"security_answer": "test"
+}
+
+```
+**Expected response** <br>
+![Alt text](docs/userforgetpassword.JPG)
+
+**Error handling**<br>
+![Alt text](docs/userforgetpassword1.JPG)<br>
+![Alt text](docs/userforgetpassword2.JPG)<br>
+![Alt text](docs/userforgetpassword3.JPG)<br>
+![Alt text](docs/userforgetpassword4.JPG)<br>
+![Alt text](docs/userforgetpassword5.JPG)<br>
+![Alt text](docs/userforgetpassword6.JPG)
+
+### 13. Reset password 
+This endpoint is for authenticated users who want to change their password. When a POST request is made to this endpoint with the old password and new password in the request body, it checks if the old password is correct and if the new password is different from the old password. If the old password is incorrect or the new password is the same as the old password, it returns an error message. If the new password is successfully set after being validated, it returns a success message.
+
+```
+Endpoint: /users/reset_password
+Request Verb: POST
+Required data: new_password, confirm_password, old_password
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected Json inputs**
+
+```
+{
+	"confirm_password":"Testtest2!",
+	"new_password":"Testtest2!",
+	"old_password":"Testtest1!"
+
+}
+
+```
+
+**Expected response** <br>
+![Alt text](docs/userresetpassword.JPG)
+
+**Error handling**<br>
+![Alt text](docs/userresetpassword1.JPG)<br>
+![Alt text](docs/userresetpassword6.JPG)<br>
+![Alt text](docs/userresetpassword2.JPG)<br>
+![Alt text](docs/userresetpassword3.JPG)<br>
+![Alt text](docs/userresetpassword4.JPG)<br>
+![Alt text](docs/userresetpassword5.JPG)<br>
+
+### 14. Reset security_answer 
+This endpoint is for authenticated users who want to change their security answer. When a POST request is made to this endpoint with the old security answer and new security answer in the request body, it checks if the old security answer is correct and if the new security answer is different from the old security answer. If the old security answer is incorrect or the new security answer is the same as the old security answer, it returns an error message. If the new security answer is successfully set after being validated, it returns a success message.
+
+```
+Endpoint: /users/reset_password
+Request Verb: POST
+Required data: old_security_answer, new_security_answer, confirm_security_answer
+Expected Response: 200 request was successful
+Authentication: JWT token must be valid
+
+```
+
+**Expected Json inputs**
+
+```
+{
+	"confirm_security_answer":"testtest",
+	"new_security_answer":"testtest" ,
+	"old_security_answer":"test"
+}
+
+
+```
+
+**Expected response** <br>
+![Alt text](docs/userresetsecurityanswer.JPG)
+
+**Error handling**<br>
+![Alt text](docs/userresetsecurityanswer1.JPG)<br>
+![Alt text](docs/userresetsecurityanswer2.JPG)<br>
+![Alt text](docs/userresetsecurityanswer3.JPG)<br>
+![Alt text](docs/userresetsecurityanswer4.JPG)<br>
+![Alt text](docs/userresetsecurityanswer5.JPG)<br>
+
+
+## ERD 
+
+ ![Alt text](docs/ERD.JPG)<br>
+
+
+USER ||--|| PANTRY :  means that one USER has exactly one PANTRY. In other words, a user can have only one pantry. <br>
+PANTRY ||--o{ PANTRYITEM : contains means that one PANTRY can contain zero or multiple PANTRYITEM. However each PANTRYITEM belongs to exactly one PANTRY. 
+
+## Describe project's models in terms of the relationships they have with each other
+
+**User Model** 
+```
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.Text(), unique=True, nullable=False) 
+    password_hash = db.Column(db.Text(), nullable=False)
+    email = db.Column(db.String(320), unique=True, nullable=False) 
+    security_question = db.Column(db.Text(), nullable=False)
+    security_answer = db.Column(db.Text(), nullable=False) 
+    pantry = db.relationship('Pantry', back_populates='user', uselist=False)
+```
+The line pantry = db.relationship('Pantry', back_populates='user', uselist=False) establishes a one-to-one relationship between the User model and the Pantry model. This relationship is enforced at the application level by SQLAlchemy
+
+Here’s how it works:
+
+- 'Pantry' is the name of the other model class. SQLAlchemy will use this to link the User model to the Pantry model.
+- back_populates='user' means that the Pantry model will have a user attribute, which will provide access to the related User object.
+- uselist=False is what makes this relationship one-to-one instead of one-to-many (which is the default). When uselist is False, SQLAlchemy knows that each User object can only be associated with one Pantry object. 
+
+**Pantry Model**
+```
+    pantry_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
+    name = db.Column(db.Text(), nullable=False)
+    user = db.relationship('User', back_populates='pantry')
+    items = db.relationship('PantryItem', back_populates='pantry')
+```
+
+- user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True): This line establishes a foreign key relationship with the User model. The user_id column in the Pantry table will store the id of the User that the pantry belongs to. The unique=True argument ensures that each Pantry can only be associated with one User. This one-to-one relationship is enforced at the database level by the unique constraint on the user_id column.
+- user = db.relationship('User', back_populates='pantry'): This line establishes a one-to-one relationship with the User model. The User model will have a pantry attribute, which will provide access to the related Pantry object. This is the other side of the relationship that was established in the User model with pantry = db.relationship('Pantry', back_populates='user', uselist=False).
+- items = db.relationship('PantryItem', back_populates='pantry'): This line establishes a one-to-many relationship with a PantryItem model. Each Pantry can have multiple PantryItem objects, which are accessible through the items attribute. The PantryItem model would have a pantry attribute, which provides access to the related Pantry object. This is enforced at the application level by SQLAlchemy
+
+
+**PantryItem Model** 
+
+```
+    item_id = db.Column(db.Integer, primary_key=True)
+    pantry_id = db.Column(db.Integer, db.ForeignKey('pantries.pantry_id'))
+    item = db.Column(db.Text(), nullable=False)
+    used_by_date = db.Column(db.Text(), nullable=False)  
+    count = db.Column(db.Integer, nullable=False)
+    run_out_time = db.Column(db.DateTime, nullable=True)
+    pantry = db.relationship('Pantry', back_populates='items')
+```
+
+- pantry_id = db.Column(db.Integer, db.ForeignKey('pantries.pantry_id')): This line establishes a foreign key relationship with the Pantry model.This means that the value of pantry_id in the PantryItem table must match the value of pantry_id in some row of the Pantry table.So, each PantryItem is associated with exactly one Pantry. This is enforced at the database level. Please note that if we set unique=True for pantry_id in the PantryItem model, it would mean that each Pantry could only have one PantryItem, which is not what we want.
+- pantry = db.relationship('Pantry', back_populates='items'): This line establishes a many-to-one relationship with the Pantry model. The Pantry model will have an items attribute, which will provide access to the list of related PantryItem objects. This is the other side of the relationship that was established in the Pantry model with items = db.relationship('PantryItem', back_populates='pantry'). This is enforced at the application level by SQLAlchemy.
+
+
+## Discuss the database relations to be implemented in your application
+
+ The project uses a relational database, which means that data is organized into tables (in this case, User, Pantry, and PantryItem), and relationships between these tables are established through foreign keys. Here’s a further explanation of how the relationships are implemented and used in the project.
+
+Foreign keys relationship implementation: <br>
+- User-Pantry Relationship: This is a one-to-one relationship. Each User has exactly one Pantry, and each Pantry belongs to exactly one User. This relationship is established through the user_id foreign key in the Pantry mode, which references the id primary key in the User model.
+- Pantry-PantryItem Relationship: This is a one-to-many relationship. Each Pantry can have multiple PantryItems, but each PantryItem belongs to exactly one Pantry. This relationship is established through the pantry_id foreign key in the PantryItem model, which references the pantry_id primary key in the Pantry model.
+
+Additionally, back-population is a feature provided by SQLAlchemy that allows for two-way navigation of relationships. <br>
+
+Back-population implementation:<br>
+- User-Pantry Back-Population: In the User model, the pantry field is a relationship to the Pantry model, and back_populates='user' tells SQLAlchemy to keep the user field of the Pantry model in sync with the pantry field of the User model. This means that if you have a User instance , you can access the user’s pantry with user.pantry, and if you have the Pantry instance that’s associated with the user, you can access the user of the pantry with pantry.user.
+- Pantry-User Back-Population: In the Pantry model, the user field is a relationship to the User model, and back_populates='pantry' tells SQLAlchemy to keep the pantry field of the User model in sync with the user field of the Pantry model. This is the other side of the User-Pantry relationship described above.
+- Pantry-PantryItem Back-Population: In the Pantry model, the items field is a relationship to the PantryItem model, and back_populates='pantry' tells SQLAlchemy to keep the pantry field of the PantryItem model in sync with the items field of the Pantry model. This means that if you have a Pantry instance, you can access the items in the pantry with pantry.items, and if you have a PantryItem instance  that’s associated with pantry, you can access the pantry of the item with pantryitem.pantry.
+- PantryItem-Pantry Back-Population: In the PantryItem model, the pantry field is a relationship to the Pantry model, and back_populates='items' tells SQLAlchemy to keep the items field of the Pantry model in sync with the pantry field of the PantryItem model. This is the other side of the Pantry-PantryItem relationship described above.
+
+These back-populations allow for two-way navigation of the relationships between the models, greatly simplifying querying. <br>
+Lastly, an Event Listener is set up to trigger after a new User record is inserted into the database. This listener automatically creates a new Pantry object associated with the newly created User. The pantry’s name is set to a string that includes the username of the User. It also ensures that every user has a pantry as soon as they are created, helping the sucess of establishing that one-to-one relationship automatically.
+
+## Describe the way tasks are allocated and tracked in your project.A software development plan
+
+For this project, I chose to use the Kanban system as a visual tool for managing my work. I used Trello as my Kanban system. This system helped me identify potential bottlenecks in my process and address them to maintain a smooth workflow. I organized my work into three stages: To Do, In Progress, and Done. As I completed tasks, I moved them from one stage to the next.
+
+In the beginning, each card in the To Do stage had only basic heading. Unless I was going to do the card in the next day or two, most of them didn't have a checklist. This approach gave me the flexibility to start with a high-level plan and then add more detailed steps as I progressed and coded more. It also allowed me to include additional tasks that I wouldn't anticipated at the start. Once I finished writing a checklist for a card, I moved the card to the In Progress stage and started working on the tasks. As I completed each task, I checked it off the checklist. Once all tasks on a card were completed, I moved the card to the Done stage. I repeated this process until all cards were in the Done stage.
+
+
+![Alt 1](docs/06122023p1.JPG)
+![Alt 2](docs/06122023p2.JPG)
+![Alt 3](docs/06122023p3.JPG)
+![Alt 4](docs/06122023p4.JPG)
+![Alt 5](docs/07122023.JPG)
+![Alt 6](docs/07122023p1.JPG)
+![Alt 7](docs/07122023p2.JPG)
+![Alt 8](docs/07122023p3.JPG)
+![Alt 9](docs/07202023p4.JPG)
+![Alt 10](docs/07122023p5.JPG)
+![Alt 10](docs/07122023p6.JPG)
+![Alt 11](docs/071202023p7.JPG)
+![Alt 12](docs/07122023p8.JPG)
+![Alt 13](docs/08122023.JPG)
+![Alt 14](docs/08122023p1.JPG)
+![Alt 15](docs/08122023p2.JPG)
+![Alt 16](docs/08122023p3.JPG)
+![Alt 17](docs/08122023p4.JPG)
+![Alt 18](docs/08122023p5.JPG)
+![Alt 19](docs/08122023p6.JPG)
+![Alt 20](docs/1112023.JPG)
+![Alt 21](docs/11122023p1.JPG)
+![Alt 22](docs/1112023p2.JPG)
+![Alt 23](docs/11122023p2.JPG)
+![Alt 24](docs/1112023p4.JPG)
+![Alt 25](docs/12122023.JPG)
+![Alt 26](docs/12122023p1.JPG)
+![Alt 27](docs/12122023p2.JPG)
+![Alt 28](docs/13122023.JPG)
+![Alt 29](docs/13122023p1.JPG)
+![Alt 30](docs/13122023p2.JPG)
+![Alt 31](docs/13122023p3.JPG)
+

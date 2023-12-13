@@ -34,7 +34,7 @@ class PantryItem(db.Model):
     @staticmethod
     def validate_count(count):
         if not isinstance(count, int):
-            raise ValidationError("Count must be an integer. Please ensure that the value is a number without any quotes or double quotes. For example, use 0 instead of '0' or \"0\".")
+            raise ValidationError("Count must be an integer. Please ensure that the value is a number without any quotes or double quotes. For example, use 0 instead of '0'.")
         if count < 0:
             raise ValidationError("Count must be a non-negative integer.")
 
