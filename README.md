@@ -539,17 +539,17 @@ Back-population implementation:<br>
 - PantryItem-Pantry Back-Population: In the PantryItem model, the pantry field is a relationship to the Pantry model, and back_populates='items' tells SQLAlchemy to keep the items field of the Pantry model in sync with the pantry field of the PantryItem model. This is the other side of the Pantry-PantryItem relationship described above.
 
 These back-populations allow for two-way navigation of the relationships between the models, greatly simplifying querying. <br>
-Lastly, an Event Listener is set up to trigger after a new User record is inserted into the database. This listener automatically creates a new Pantry object associated with the newly created User. The pantry’s name is set to a string that includes the username of the User. It also ensures that every user has a pantry as soon as they are created, helping the sucess of establishing that one-to-one relationship automatically.
+Lastly, an Event Listener is set up to trigger after a new User record is inserted into the database. This listener automatically creates a new Pantry object associated with the newly created User. The pantry’s name is set to a string that includes the username of the User. It also ensures that every user has a pantry as soon as they are created, helping the success of establishing that one-to-one relationship automatically.
 
 ## Detail any third party services that your app used. 
 
-- flask: A micro web framework written in Python.
-- flask_sqlalchemy: Adds SQLAlchemy support to your Flask application.
-- flask_bcrypt: Provides bcrypt hashing utilities for your application.
-- flask_jwt_extended: Adds JWT functionality to your Flask application.
-- flask_marshmallow: An ORM/ODM/framework-agnostic library for converting complex datatypes to and from Python data types.
-- marshmallow: A lightweight library for converting complex datatypes to and from Python data types.
-- dotenv: A module that allows you to specify environment variables in traditional UNIX-like “.env” files.
+- flask: Written in Python, Flask stands as a micro web framework; its design aids developers in constructing secure—scalable—and maintainable web applications.The Flask library facilitates the creation of routes; it equips developers with endpoint definition capabilities and management tools for handling HTTP requests/responses.
+- flask_sqlalchemy: an extension for Flask, enhances your application with SQLAlchemy support. It streamlines the process of integrating SQLAlchemy into Flask by offering pragmatic defaults and supplementary helpers that facilitate routine tasks. By mapping Python classes to database tables through schemas, it simplifies database operations. The system presents a Pythonic interface at an advanced level, facilitating the creation of your database, executing queries and manipulating data through SQL commands.
+- flask_bcrypt: PFlask-Bcrypt is a Flask extension that provides bcrypt hashing utilities for your application. Bcrypt is an advanced password hashing algorithm that is particularly strong against brute force attacks.
+- flask_jwt_extended: The extension 'flask_jwt_extended' injects JSON Web Token (JWT) support into your Flask application. JWTs, a secure information transmission method between parties, typically handle user authentication and authorization due to their reliability: digital signing renders this data verifiable and trustworthy
+- flask_marshmallow: TThe flask_marshmallow extension integrates Marshmallow into Flask; it's a versatile library: an ORM/ODM/framework-agnostic tool that simplifies the serialization and deserialization of complex data types such as objects to Python data structures. This proves particularly valuable in API development where you often require sending or receiving data in Json format.
+- marshmallow: Marshmallow, a lightweight library, it converts complex datatypes to and from Python data types; primarily used for object serialization/deserialization. It proficiently handles nested fields, collections and complex object structures: through this versatile tool you can easily render and validate JSON responses in your Flask routes using Marshmallow schemas.
+- dotenv: module enables the specification of environment variables in conventional UNIX-like ".env" files. Often, environment variables store sensitive information: API keys; database credentials; and other configuration settings that should not be hardcoded into the source code of an application. Exposing or sharing this source code can potentially lead to security vulnerabilities when such information is hard-coded.
 
 ## Describe the way tasks are allocated and tracked in your project.A software development plan
 
@@ -557,6 +557,7 @@ For this project, I chose to use the Kanban system as a visual tool for managing
 
 In the beginning, each card in the To Do stage had only basic heading. Unless I was going to do the card in the next day or two, most of them didn't have a checklist. This approach gave me the flexibility to start with a high-level plan and then add more detailed steps as I progressed and coded more. It also allowed me to include additional tasks that I wouldn't anticipated at the start. Once I finished writing a checklist for a card, I moved the card to the In Progress stage and started working on the tasks. As I completed each task, I checked it off the checklist. Once all tasks on a card were completed, I moved the card to the Done stage. I repeated this process until all cards were in the Done stage.
 
+I also monitored my project progress through daily Stand-up meetings. These meetings provided an opportunity for me to share updates on the tasks I had listed in my Trello board, as well as discuss my current status. I could also bring up any challenges I was facing and discuss my future plans. This practice served as a self-check mechanism, helping me stay accountable and keep track of my progress.
 
 ![Alt 1](docs/06122023p1.JPG)
 ![Alt 2](docs/06122023p2.JPG)
@@ -590,6 +591,9 @@ In the beginning, each card in the To Do stage had only basic heading. Unless I 
 ![Alt 29](docs/13122023p1.JPG)
 ![Alt 30](docs/13122023p2.JPG)
 ![Alt 31](docs/13122023p3.JPG)
+![Alt 31](docs/standup.JPG)
+![Alt 31](docs/standup1.JPG)
+
 
 
 ## References 
