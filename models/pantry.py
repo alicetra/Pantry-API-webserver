@@ -56,29 +56,17 @@ class PantryItem(db.Model):
 # In some routes some fields are not required but in others they are,
 # having a blanket schema would remove the approriate requirement fields and error handling message for each routes which I coded into the baseschema validation.
 
-
-class BaseItemSchema(BaseSchema):
+class PantryItemSchema(BaseSchema):
     # Serialization/deserialization and validation of the data. 
     # Might seem reduntant to define the type again as the type is define in the model for what is accepted input. 
     # However putting validating in the schema will allow for  validation error to be raise before the data is processed or stored.
     item = fields.Str(required=True)
-
-    class Meta:
-        # This line allows for unknown fields and my custom validation in BaseSchema to takes over, providing my specific error message.
-        # Else a generic message will be provided as " "Unknown field."
-        unknown = INCLUDE
-        fields = ("item",)
-
-class PantryItemSchema(BaseItemSchema):
     used_by_date = fields.Str(required=True)
     count = fields.Int(required=True) 
 
     class Meta:
         unknown = INCLUDE
-        # BaseItemSchema.Meta.fields refers to the 'fields' attribute in the Meta class inside BaseItemSchema. 
-        # It's a tuple containing the field names ("item") defined in BaseItemSchema.
-        # Here, we're creating a new tuple that includes the fields from BaseItemSchema plus "used_by_date" and "count". This is done to adhered to D.R.Y
-        fields = BaseItemSchema.Meta.fields + ("used_by_date", "count")
+        fields = ("item", "used_by_date", "count")
 
 class UpdatePantryItemSchema(BaseSchema):
     # the fields are not required since I want the client to decide what fields to update. They might only want to update one field only. 
