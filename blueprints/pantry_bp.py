@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 from datetime import datetime
 from jwt_config import get_current_user
-from models.pantry import PantryItem, PantryItemSchema, DeletePantryItemSchema, UpdatePantryItemSchema
+from models.pantry import PantryItem, PantryItemSchema,UpdatePantryItemSchema
 from utils import validate_data, validate_fields, check_match, prepare_data_dict, create_response, check_no_change
 from setup import db
 from marshmallow import ValidationError
@@ -12,7 +12,8 @@ pantry_bp = Blueprint('pantry', __name__, url_prefix='/pantry')
 # This function takes an item as input and converts it to lowercase. This ensure consistency in the database,I wanted item to be case-insensitive.
 # Refactoring normalize_item to be the single source of item normalization ensures consistent application of rules, simplifies code maintenance, and enhances readability.
 def normalize_item(item):
-    return item.lower()
+    normalized_item = item.lower().strip()
+    return normalized_item
 
 # pantry_item.__dict__ is a function that returns a dictionary containing the attributes of the pantry_item (model) as keys and their corresponding values.
 #The dictionary comprehension then iterates over these key-value pairs.
@@ -126,44 +127,45 @@ def post_pantry_item():
     return create_response("Item added to the pantry", 201)
 
 
-@pantry_bp.route("/item", methods=["DELETE"])
+@pantry_bp.route("/<item>", methods=["DELETE"])
 # This route is a jwt required one since I only want the user to be allowed to delete their own pantry item and no one else.
 @jwt_required()
-def delete_pantry():
-    schema = DeletePantryItemSchema()
-    data = validate_data(request, schema)
-    if isinstance(data, tuple): 
-        return data
-
+def delete_pantry_item(item):
     user = get_current_user()
 
-    normalized_item = normalize_item(data['item']) 
+    # This converts the input item from the route to lowercase. 
+    # This is done to ensure that the item names are treated in a case-insensitive manner. 
+    # Since all items in our pantry are saved in a case-insensitive manner,
+    # I wanted the retrieval to be case-insensitive too.
+    normalized_item = normalize_item(item)
 
-    pantry = user.pantry 
+    pantry = user.pantry
 
-    # get the item in the pantry that matches the provided item that is normalised now, or None if no such item exists
-    # The relationship between the `Pantry` and `PantryItem` models allows us to directly access the items in a user's pantry using the `items` attribute.
+    # This line searches for the item in the user's pantry. If the item is found, it is returned. Otherwise, `None` is returned.
     pantry_item = next((item for item in pantry.items if item.item == normalized_item), None)
-    # if item exist and a match has been found
+
+    # If the item exists
     if pantry_item:
-        # this line will delete it from the database.
+        # This line will delete it from the database.
         db.session.delete(pantry_item)
         # This line commits the changes to the database.
         db.session.commit()
-         # This line returns a response indicating that the item has been deleted, along with a 200 status code.
+        # This line returns a response indicating that the item has been deleted, along with a 200 status code.
         return create_response(f"{normalized_item} has been deleted", 200)
-    # else if item return none meaning item doesnt exist
-    # this line returns a response indicating that the item does not exist in the database.
-    # the 400 status code is returned when the item does not exist in the database, 
-    # which could be considered as an invalid user input - the user is trying to delete an item that doesn’t exist.
-    # returning a 400 status code makes it clear that the requested operation of this route (which is for deleting an item) has failed.
+    # If the item does not exist
     else:
+        # This line returns a response indicating that the item does not exist in the database, along with a 400 status code.
+        # The 400 status code is returned when the item does not exist in the database, 
+        # which could be considered as an invalid user input - the user is trying to delete an item that doesn’t exist.
+        # Returning a 400 status code makes it clear that the requested operation of this route (which is for deleting an item) has failed.
         return create_response(f"{normalized_item} doesn't exist in the database", 400)
 
-@pantry_bp.route("/item", methods=["PUT"])
+
+
+@pantry_bp.route("/<item>", methods=["PUT", "PATCH"])
 # This route is a jwt required one since I only want the user to be allowed to ammend the data of their items.
 @jwt_required()
-def update_pantry():
+def update_pantry(item):
     schema = UpdatePantryItemSchema()
     data = validate_data(request, schema)
     if isinstance(data, tuple): 
@@ -171,19 +173,19 @@ def update_pantry():
 
     user = get_current_user()
 
-    normalized_item = normalize_item(data['item']) 
+    # This converts the input item from the route to lowercase. 
+    # This is done to ensure that the item names are treated in a case-insensitive manner. 
+    # Since all items in our pantry are saved in a case-insensitive manner,
+    # I wanted the retrieval to be case-insensitive too.
+    normalized_item = normalize_item(item)
 
     pantry = user.pantry  
 
-    pantry_item = next((item for item in pantry.items if item.item == normalized_item), None)
-
     # This line sets the variable 'updated' to False as an initial state.
-    # This variable is used to track whether any actual update operation has been performed on the pantry item.
-    # If either 'count' or 'used_by_date' (or both) are not provided in the request data, 
-    # the pantry item will not be updated even though the item name (which is the only required field in the schema) is provided.
-    # In such a case, we don't want the API to incorrectly indicate that an update operation has been performed.
-    # Therefore, we initialize 'updated' to False and only set it to True when we actually update a field of the pantry item.
+    # This variable is used to track whether any actual update operation has been performed on the pantry item since in the schema fields are optional.
     updated = False
+
+    pantry_item = next((item for item in pantry.items if item.item == normalized_item), None)
 
     # This line checks if pantry_item is None. If it is, it means that no item matching the normalized_item was found in the pantry.
     if pantry_item is None:
@@ -211,8 +213,8 @@ def update_pantry():
             return response
         # If the used_by_date in the request data is different from the current one, this line updates the pantry item's used_by_date with the new date.
         pantry_item.used_by_date = data['used_by_date']
-        # Since an update has been made, this line sets 'updated' to True.
         updated = True
+
 
     # This line checks if 'count' is a key in the request (inputted) data.    
     if 'count' in data:
@@ -235,7 +237,6 @@ def update_pantry():
         if pantry_item.count == 0:
             # this line sets the pantry_item's run_out_time to the current time. 
             pantry_item.run_out_time = datetime.now()
-        # Since an update has been made, this line sets 'updated' to True.
         updated = True
 
     # if update has been set to True at any point in the code 
@@ -245,6 +246,7 @@ def update_pantry():
         return create_response(f"{normalized_item} has been updated", 200)
     else:
         return create_response("No update since no amendment has been provided for either count or used_by_date or both", 400)
+
 
 
 @pantry_bp.route("/itemrunout", methods=["GET"])

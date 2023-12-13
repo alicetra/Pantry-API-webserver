@@ -158,10 +158,10 @@ Authentication: JWT token must be valid
 
 
 ### 4. Deleting item from your pantry
-This endpoint is for deleting items from the pantry. When a DELETE request is made to this endpoint with the names of the items to be deleted in the request body, it deletes the item from the current user’s pantry. If the item does not exist, it returns a message indicating so.
+This endpoint is for deleting items from the pantry. When a DELETE request is made to this endpoint with the names of the items to be deleted in the url, it deletes the item from the current user’s pantry. If the item does not exist, it returns a message indicating so.
 
 ```
-Endpoint: /pantry/item
+Endpoint: /pantry/<item>
 Request Verb: DELETE
 Required data: Item
 Expected Response: 200 request was successful
@@ -169,30 +169,20 @@ Authentication: JWT token must be valid
 
 ```
 
-**Expected Json input**
-```
-{
-    "item": "test"
-}
-
-```
 
 **Expected response** <br>
-![Alt text](docs/pantrydelete.JPG)
+![Alt text](docs/pantrydelete6.JPG)
 
 **Error handling**<br>
-![Alt text](docs/pantrydelete1.JPG)<br>
-![Alt text](docs/pantrydelete2.JPG)<br>
-![Alt text](docs/pantrydelete3.JPG)<br>
-![Alt text](docs/pantrydelete4.JPG)<br>
-![Alt text](docs/pantrydelete5.JPG)
+![Alt text](docs/pantrydelete7.JPG)<br>
+
 
 ### 5. Updating your item data
 This endpoint is for updating  an item in the pantry. When a PUT request is made in the request body, it first check that the item exist in the pantry. if item does indeed exist it validates the new data and updates the item data in the current user’s pantry. If the new data is the same as the old data, it returns a message indicating that the data needs to be different for an update to actually occur.
 
 ```
-Endpoint: /pantry/item
-Request Verb: PUT
+Endpoint: /pantry/<item>
+Request Verb: PUT/PATCH
 Required data: Item and at least count or used_by_date or both
 Expected Response: 200 request was successful
 Authentication: JWT token must be valid
@@ -204,37 +194,29 @@ Authentication: JWT token must be valid
 ```
 
     {
-        "item": "test",
 			"count": 1,
 			"used_by_date": "21-12-2023"
     }
 ```
 ```
     {
-        "item": "test",
 			"count": 1
     }
 ```
 ```
     {
-        "item": "test",
 			"used_by_date": "21-12-2023"
     }
 ```
 **Expected response** <br>
-![Alt text](docs/pantryput.JPG)<br>
-![Alt text](docs/pantryput1.JPG)<br>
-![Alt text](docs/pantryput2.JPG)
+![Alt text](docs/pantryput11.JPG)<br>
 
 **Error handling**<br>
-![Alt text](docs/pantryput3.JPG)<br>
-![Alt text](docs/pantryput4.JPG)<br>
-![Alt text](docs/pantryput5.JPG)<br>
-![Alt text](docs/pantryput6.JPG)<br>
-![Alt text](docs/pantryput7.JPG)<br>
-![Alt text](docs/pantryput8.JPG)<br>
-![Alt text](docs/pantryput10.JPG)<br>
-![Alt text](docs/pantryput9.JPG)<br>
+![Alt text](docs/pantryput12.JPG)<br>
+![Alt text](docs/pantryput13.JPG)<br>
+![Alt text](docs/pantryput14.JPG)<br>
+![Alt text](docs/pantryput15.JPG)<br>
+![Alt text](docs/pantryput16.JPG)<br>
 
 ### 6. List all the items that have ran out in your pantry
 When a GET request is made to this endpoint, it returns a list of all items in the current user’s pantry that have run out. If there is no item in your pantry whose count is 0, it will return a message to say so.

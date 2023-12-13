@@ -80,14 +80,11 @@ class PantryItemSchema(BaseItemSchema):
         # Here, we're creating a new tuple that includes the fields from BaseItemSchema plus "used_by_date" and "count". This is done to adhered to D.R.Y
         fields = BaseItemSchema.Meta.fields + ("used_by_date", "count")
 
-class DeletePantryItemSchema(BaseItemSchema):
-    pass
-
-class UpdatePantryItemSchema(BaseItemSchema):
+class UpdatePantryItemSchema(BaseSchema):
     # the fields are not required since I want the client to decide what fields to update. They might only want to update one field only. 
     used_by_date = fields.Str()
     count = fields.Int()
 
     class Meta:
         unknown = INCLUDE
-        fields = BaseItemSchema.Meta.fields + ("used_by_date", "count")
+        fields = ("used_by_date", "count")
