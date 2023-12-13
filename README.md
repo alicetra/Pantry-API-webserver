@@ -153,7 +153,8 @@ Authentication: JWT token must be valid
 ![Alt text](docs/pantrypost5.JPG)<br>
 ![Alt text](docs/pantrypost6.JPG)<br>
 ![Alt text](docs/pantrypost7.JPG)<br>
-![Alt text](docs/pantrypost9.JPG)
+![Alt text](docs/pantrypost9.JPG)<br>
+![Alt text](docs/pantrypost10.JPG)
 
 
 ### 4. Deleting item from your pantry
@@ -183,7 +184,8 @@ Authentication: JWT token must be valid
 ![Alt text](docs/pantrydelete1.JPG)<br>
 ![Alt text](docs/pantrydelete2.JPG)<br>
 ![Alt text](docs/pantrydelete3.JPG)<br>
-![Alt text](docs/pantrydelete4.JPG)
+![Alt text](docs/pantrydelete4.JPG)<br>
+![Alt text](docs/pantrydelete5.JPG)
 
 ### 5. Updating your item data
 This endpoint is for updating  an item in the pantry. When a PUT request is made in the request body, it first check that the item exist in the pantry. if item does indeed exist it validates the new data and updates the item data in the current user’s pantry. If the new data is the same as the old data, it returns a message indicating that the data needs to be different for an update to actually occur.
@@ -231,7 +233,8 @@ Authentication: JWT token must be valid
 ![Alt text](docs/pantryput6.JPG)<br>
 ![Alt text](docs/pantryput7.JPG)<br>
 ![Alt text](docs/pantryput8.JPG)<br>
-![Alt text](docs/pantryput10.JPG)
+![Alt text](docs/pantryput10.JPG)<br>
+![Alt text](docs/pantryput9.JPG)<br>
 
 ### 6. List all the items that have ran out in your pantry
 When a GET request is made to this endpoint, it returns a list of all items in the current user’s pantry that have run out. If there is no item in your pantry whose count is 0, it will return a message to say so.
@@ -319,7 +322,8 @@ Authentication: none
 ![Alt text](docs/userregister9.JPG)<br>
 ![Alt text](docs/userregister10.JPG)<br>
 ![Alt text](docs/userregister11.JPG)<br>
-![Alt text](docs/userregister12.JPG)
+![Alt text](docs/userregister12.JPG)<br>
+![Alt text](docs/userregister15.JPG)
 
 
 ### 10. Login 
@@ -352,6 +356,7 @@ Authentication: JWT token must be valid
 ![Alt text](docs/userlogin1.JPG)<br>
 ![Alt text](docs/userlogin2.JPG)<br>
 ![Alt text](docs/userlogin3.JPG)<br>
+![Alt text](docs/userlogin5.JPG)
 
 
 ### 11. Logout  
@@ -403,7 +408,8 @@ Authentication: none
 ![Alt text](docs/userforgetpassword3.JPG)<br>
 ![Alt text](docs/userforgetpassword4.JPG)<br>
 ![Alt text](docs/userforgetpassword5.JPG)<br>
-![Alt text](docs/userforgetpassword6.JPG)
+![Alt text](docs/userforgetpassword6.JPG)<br>
+![Alt text](docs/userforgetpassword7.JPG)
 
 ### 13. Reset password 
 This endpoint is for authenticated users who want to change their password. When a POST request is made to this endpoint with the old password and new password in the request body, it checks if the old password is correct and if the new password is different from the old password. If the old password is incorrect or the new password is the same as the old password, it returns an error message. If the new password is successfully set after being validated, it returns a success message.
@@ -439,6 +445,7 @@ Authentication: JWT token must be valid
 ![Alt text](docs/userresetpassword3.JPG)<br>
 ![Alt text](docs/userresetpassword4.JPG)<br>
 ![Alt text](docs/userresetpassword5.JPG)<br>
+![Alt text](docs/userresetpassword8.JPG)
 
 ### 14. Reset security_answer 
 This endpoint is for authenticated users who want to change their security answer. When a POST request is made to this endpoint with the old security answer and new security answer in the request body, it checks if the old security answer is correct and if the new security answer is different from the old security answer. If the old security answer is incorrect or the new security answer is the same as the old security answer, it returns an error message. If the new security answer is successfully set after being validated, it returns a success message.
@@ -473,7 +480,7 @@ Authentication: JWT token must be valid
 ![Alt text](docs/userresetsecurityanswer3.JPG)<br>
 ![Alt text](docs/userresetsecurityanswer4.JPG)<br>
 ![Alt text](docs/userresetsecurityanswer5.JPG)<br>
-
+![Alt text](docs/userresetsecurityanswer6.JPG)
 
 ## ERD 
 
