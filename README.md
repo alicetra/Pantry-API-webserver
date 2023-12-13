@@ -552,6 +552,16 @@ Back-population implementation:<br>
 These back-populations allow for two-way navigation of the relationships between the models, greatly simplifying querying. <br>
 Lastly, an Event Listener is set up to trigger after a new User record is inserted into the database. This listener automatically creates a new Pantry object associated with the newly created User. The pantry’s name is set to a string that includes the username of the User. It also ensures that every user has a pantry as soon as they are created, helping the sucess of establishing that one-to-one relationship automatically.
 
+## Detail any third party services that your app used. 
+
+- flask: A micro web framework written in Python.
+- flask_sqlalchemy: Adds SQLAlchemy support to your Flask application.
+- flask_bcrypt: Provides bcrypt hashing utilities for your application.
+- flask_jwt_extended: Adds JWT functionality to your Flask application.
+- flask_marshmallow: An ORM/ODM/framework-agnostic library for converting complex datatypes to and from Python data types.
+- marshmallow: A lightweight library for converting complex datatypes to and from Python data types.
+- dotenv: A module that allows you to specify environment variables in traditional UNIX-like “.env” files.
+
 ## Describe the way tasks are allocated and tracked in your project.A software development plan
 
 For this project, I chose to use the Kanban system as a visual tool for managing my work. I used Trello as my Kanban system. This system helped me identify potential bottlenecks in my process and address them to maintain a smooth workflow. I organized my work into three stages: To Do, In Progress, and Done. As I completed tasks, I moved them from one stage to the next.
@@ -591,4 +601,37 @@ In the beginning, each card in the To Do stage had only basic heading. Unless I 
 ![Alt 29](docs/13122023p1.JPG)
 ![Alt 30](docs/13122023p2.JPG)
 ![Alt 31](docs/13122023p3.JPG)
+
+
+## References 
+
+Foodbank Australia. (n.d.). Food waste facts in Australia.
+Available at: 
+ https://www.foodbank.org.au/food-waste-facts-in-australia/?state=vic
+
+ABC News. (2023, August 14). Food inflation: Are food prices going to go down? 
+Available at: https://www.abc.net.au/news/2023-08-14/food-inflation-are-food-prices-going-to-go-down/1026692
+
+ASC Consultants. (n.d.). The science behind food expiry dates. 
+Available at: 
+https://ascconsultants.co.za/the-science-behind-food-expiry-dates
+
+Panchenko, I. (2021). PostgreSQL benefits and challenges: A snapshot.InfoWorld. 
+Available at: https://www.infoworld.com/article/3619531/postgresql-benefits-and-challenges-a-snapshot.html
+
+Bytebase. (2023a). Postgres vs. MongoDB: a Complete Comparison in 2023. 
+Available at: https://www.bytebase.com/blog/postgres-vs-mongodb/ [Accessed 13 Dec. 2023].
+
+Bytebase. (2023b). Postgres vs. MySQL: a Complete Comparison in 2023.
+Available at: https://www.bytebase.com/blog/postgres-vs-mysql/#:~:text=Range%20Units%3A%20MySQL%20only%20supports [Accessed 13 Dec. 2023].
+
+Joy, A. (n.d.). Introduction to ORM with Flask-SQLAlchemy.Pythonista Planet. 
+Available at: https://pythonistaplanet.com/flask-sqlalchemy/ [Accessed 13 Dec. 2023].
+
+Turso Blog. (2023). When to choose an ORM for your Database. 
+ Available at: https://blog.turso.tech/when-to-choose-an-orm-for-your-database-11a05b42 [Accessed 13 Dec. 2023].
+ 
+www2.sqlite.org. (n.d.). SQLite CVSTrac. 
+Available at: https://www2.sqlite.org/cvstrac/wiki?p=WhenToUseSqlite#:~:text=The%20basic%20rule%20of%20thumb [Accessed 13 Dec. 2023].
+
 
