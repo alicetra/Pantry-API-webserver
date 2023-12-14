@@ -538,7 +538,19 @@ Back-population implementation:<br>
 - Pantry-PantryItem Back-Population: In the Pantry model, the items field is a relationship to the PantryItem model, and back_populates='pantry' tells SQLAlchemy to keep the pantry field of the PantryItem model in sync with the items field of the Pantry model. This means that if you have a Pantry instance, you can access the items in the pantry with pantry.items, and if you have a PantryItem instance  that’s associated with pantry, you can access the pantry of the item with pantryitem.pantry.
 - PantryItem-Pantry Back-Population: In the PantryItem model, the pantry field is a relationship to the Pantry model, and back_populates='items' tells SQLAlchemy to keep the items field of the Pantry model in sync with the pantry field of the PantryItem model. This is the other side of the Pantry-PantryItem relationship described above.
 
-These back-populations allow for two-way navigation of the relationships between the models, greatly simplifying querying. <br>
+These back-populations would allow for two-way navigation of the relationships between the models. <br>
+
+Join Operation:<br>
+To establish a connection between the `PantryItem`, `Pantry`, and `User` tables,despite the lack of direct reference from the 'PantryItem' model to the 'User' model. I employ a 'JOIN' operation within a function in utils called get_user_pantry_query. This table-joining strategy enables us not only to access fields within both models in our query but also filter for data related specifically to current users; thus, its necessity is paramount. Various pantry routes in the application utilize this function.
+
+Directly adding a user_id foreign key to the PantryItem model would have establish a direct relationship between User and PantryItem. Yet, this approach would not have been logical to our data structure; in our application, an individual User is not directly associated with any given PantryItem. Instead, each specific PantryItem aligns itself to its respective unique Pantry, which itself belong uniquely to a User.
+
+Maintaining the data model's integrity and accurately representing the entities' relationships require me to keep these specific relationships: User 1:1 Pantry; Pantry 1:N PantryItem.
+
+When executing the get_user_pantry_query function and utilizing the JOIN operation in my query, I am actively avoiding loading all PantryItem objects into memory. Instead, it helps to construct a SQL command destined for execution within the database; subsequently - only those PantryItem entities that meet the query's conditions are returned by this database operation. When managing substantial data volumes, this offers significantly enhanced efficiency.
+
+Utilizing back-population can proves exceptionally beneficial in relationship navigation and code simplification; however, it may not invariably serve as the optimal tool. For situations prioritizing efficiency and memory usage (eg.a Pantry with many PantryItem), employing JOIN operations within my queries presented a superior approach. 
+
 Lastly, an Event Listener is set up to trigger after a new User record is inserted into the database. This listener automatically creates a new Pantry object associated with the newly created User. The pantry’s name is set to a string that includes the username of the User. It also ensures that every user has a pantry as soon as they are created, helping the success of establishing that one-to-one relationship automatically.
 
 ## Detail any third party services that your app used. 
