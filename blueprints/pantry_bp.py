@@ -6,7 +6,8 @@ from models.pantry import PantryItem, PantryItemSchema,UpdatePantryItemSchema,Pa
 from models.user import User
 from utils import validate_data, validate_fields, prepare_data_dict, create_response, check_no_change,get_user_pantry_query
 from setup import db
-
+from sqlalchemy import cast, Date
+from datetime import timedelta
 
 pantry_bp = Blueprint('pantry', __name__, url_prefix='/pantry')
 
@@ -24,11 +25,6 @@ def normalize_item(item):
 # the reason why I excluded certain key is that I wanted my return to be relevant to the user.
 def pantry_item_to_dict(pantry_item):
     return {key: value for key, value in pantry_item.__dict__.items() if not key.startswith('_') and key != 'pantry' and key != 'item_id' and key != 'pantry_id'}
-
-#This function converts the 'used_by_date' attribute of an item into a date object.
-def convert_used_by_date_to_date(item):
-    item_date = datetime.strptime(item.used_by_date, "%d-%m-%Y").date() 
-    return item_date
 
 @pantry_bp.route("/", methods=["GET"])
 # This route is JWT required one since user can only access their own pantry
@@ -256,29 +252,21 @@ def get_runout_items():
 @jwt_required()
 def get_items_used_by(days):
     user = get_current_user()
-    # This line sets the current date.
+    # Get the current date
     now = datetime.now().date()
-    # This line initializes an empty list to store the items to be used.
-    items_to_use = []
-     # This line iterates over each item in the user's pantry.
-     # since I need to convert the used_by_date from a string to a date, the fletching of the data cannot be done in a SQLAlchemy query,
-    for item in user.pantry.items:
-         # This line converts the used-by date of the item to a date object.
-        item_date = convert_used_by_date_to_date(item)
-         # This line calculates the difference in days between the item's used-by date and the current date.
-        diff_days = (item_date - now).days
-        # This line checks if the item needs to be used within the specified number of days.
-        if diff_days >= 0 and diff_days <= days:
-            # If the item needs to be used within the specified number of days, this line adds the item to the items_to_use list.
-            items_to_use.append(item)
-    # This line checks if there are any items to be used within the specified number of days.
+    # Calculate the future date by adding the specified number of days to the current date
+    # When this timedelta is added to 'now', it results in a new date that is 'x' amount of days in the future
+    future = now + timedelta(days=days)
+
+    # filters for items that need to be used between now and the future date
+    items_to_use = get_user_pantry_query(user.id).filter(
+        cast(PantryItem.used_by_date, Date) >= now,
+        cast(PantryItem.used_by_date, Date) <= future
+    ).all()
+     # If there are items to use, return them in the response
     if items_to_use:
-        # If there are items to be used within the specified number of days, this line returns a response with a list of these items,
-        # each in their dictionary format, along with a 200 status code.
         return create_response([pantry_item_to_dict(item) for item in items_to_use], 200)
     else:
-        # If there are no items to be used within the specified number of days, this line returns a response indicating that there are no such items,
-        # along with a 200 status code.
         return create_response(f"You have no items to be used in the next {days} days", 200)
 
 
@@ -288,17 +276,13 @@ def get_items_used_by(days):
 def get_expired_items():
     user = get_current_user()
     now = datetime.now().date()
-    # This line initializes an empty list to store the expired items.
-    expired_items = []
-    for item in user.pantry.items:
-        item_date = convert_used_by_date_to_date(item)
-        # This line checks if the item has expired.
-        if item_date < now:
-             # If the item has expired, this line adds the item to the expired_items list.
-            expired_items.append(item)
-     # This line checks if there are any expired items.
+
+    # filters for items that have expired and therefore is less (passed) than the current date
+    expired_items = get_user_pantry_query(user.id).filter(
+        cast(PantryItem.used_by_date, Date) < now
+    ).all()
+     # If there are expired items, return them in the response
     if expired_items:
         return create_response([pantry_item_to_dict(item) for item in expired_items], 200)
     else:
-        # If there are no expired items, this line returns a response indicating that there are no expired items, along with a 200 status code.
         return create_response("You have no expired items", 200)

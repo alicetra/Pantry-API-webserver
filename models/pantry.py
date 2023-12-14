@@ -44,14 +44,13 @@ class PantryItem(db.Model):
         if not all(word.isalpha() for word in item.split()):
             raise ValidationError("Item must be a string containing only alphabetic characters and spaces.")
 
-    # This staticmethod validates the used_by_date. It checks if the date is in the format 'dd-mm-yyyy'
+    # This staticmethod validates the used_by_date. It checks if the date is in the format 'yyyy-mm-dd'
     @staticmethod
     def validate_used_by_date(date):
         try:
-            datetime.strptime(date, "%d-%m-%Y")
+            datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
-            raise ValidationError("used_by_date must be a string in the format 'dd-mm-yyyy'")
-
+            raise ValidationError("used_by_date must be a string in the format 'yyyy-mm-dd'")
 
 # In some routes some fields are not required but in others they are,
 # having a blanket schema would remove the approriate requirement fields and error handling message for each routes which I coded into the baseschema validation.
