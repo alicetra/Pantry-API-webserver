@@ -58,7 +58,9 @@ def get_pantry_item(item):
     # I wanted the retrieval to be case-insentitive too.
     normalized_item = normalize_item(item)
     pantry_items = user.pantry.items  
-     # This line searches for the item in the user's pantry. If the item is found, it is returned. Otherwise, `None` is returned.
+    # This line searches for the item in the user's pantry. If the item is found, it is returned. Otherwise, `None` is returned.
+    # Since I already loaded the user pantry item into memory with pantry_items = user.pantry.items. I decided to find the item through a python iteration
+    # this method doesn’t require an additional database query, which could be beneficial if database is under heavy load or if network latency is a concern.
     pantry_item = next((item for item in pantry_items if item.item == normalized_item), None)
     # If pantry_item is not none
     if pantry_item:
