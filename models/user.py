@@ -1,5 +1,4 @@
 from setup import db, bcrypt
-from flask_bcrypt import Bcrypt
 from sqlalchemy import event
 from marshmallow import ValidationError
 import re

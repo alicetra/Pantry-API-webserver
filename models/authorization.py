@@ -1,5 +1,5 @@
-from marshmallow import Schema, fields, INCLUDE
-from setup import db, ma
+from marshmallow import fields, INCLUDE
+from setup import db
 from .base_schema import BaseSchema
 
 

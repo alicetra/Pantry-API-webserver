@@ -1,9 +1,8 @@
 from dotenv import load_dotenv
 import os
-from flask import Flask,jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
 
 # Load environment variables

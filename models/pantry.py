@@ -1,5 +1,5 @@
 from setup import db
-from marshmallow import Schema, fields, INCLUDE, ValidationError
+from marshmallow import fields, INCLUDE, ValidationError
 from datetime import datetime
 from .base_schema import BaseSchema
 

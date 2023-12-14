@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from marshmallow import Schema, fields, ValidationError
 from models.user import User
-from models.pantry import PantryItem 
+from models.pantry import PantryItem, Pantry
 import json
 
 #refractor the format of return responses in my routes since they all have to be consistently json.
@@ -110,3 +110,8 @@ def check_field(User, field, value, error_message):
 def get_model_by_field(Model, field, value):
     return Model.query.filter_by(**{field: value}).scalar()
 
+# The join operation is necessary to connect the PantryItem and Pantry tables together.
+# This is because the PantryItem model doesn’t have a direct reference to the User model. By joining these tables, we can access the fields of both models in our query,
+# allowing us to filter for the current user.
+def get_user_pantry_query(user_id):
+    return PantryItem.query.join(Pantry).join(User).filter(User.id == user_id)
