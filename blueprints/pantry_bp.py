@@ -146,7 +146,6 @@ def delete_pantry_item(item):
         return create_response(f"{normalized_item} has been deleted", 200)
     # If the item does not exist
     else:
-        # This line returns a response indicating that the item does not exist in the database, along with a 400 status code.
         # The 404 status code is returned when the item does not exist in the database, .
         return create_response(f"{normalized_item} doesn't exist in the database", 404)
 
