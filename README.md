@@ -138,7 +138,7 @@ Authentication: JWT token must be valid
 {
 	"count": 0,
 	"item": "TEST",
-	"used_by_date":"20-12-2023"
+	"used_by_date":"2023-12-20"
 }
 ```
 
@@ -195,7 +195,7 @@ Authentication: JWT token must be valid
 
     {
 			"count": 1,
-			"used_by_date": "21-12-2023"
+			"used_by_date":"2023-12-20"
     }
 ```
 ```
@@ -205,7 +205,7 @@ Authentication: JWT token must be valid
 ```
 ```
     {
-			"used_by_date": "21-12-2023"
+			"used_by_date":"2023-12-20"
     }
 ```
 **Expected response** <br>
