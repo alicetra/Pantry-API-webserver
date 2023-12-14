@@ -59,7 +59,7 @@ class PantryItem(db.Model):
 class PantryItemSchema(BaseSchema):
     # Serialization/deserialization and validation of the data. 
     # Might seem reduntant to define the type again as the type is define in the model for what is accepted input. 
-    # However putting validating in the schema will allow for  validation error to be raise before the data is processed or stored.
+    # However putting validating in the schema will allow for  validation error to be raise before the data is processed.
     item = fields.Str(required=True)
     used_by_date = fields.Str(required=True)
     count = fields.Int(required=True) 

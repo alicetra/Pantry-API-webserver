@@ -8,7 +8,6 @@ import json
 # The **kwargs argument allows for optional keyword arguments to be passed into the function.
 # These arguments are then added to the response dictionary.
 # For example, when a new user is registered, I want to return their username and email in the response.
-# This can be done through user={'username': processed_data['username'], 'email': processed_data['email']} as a keyword argument when calling this function.
 # The **kwargs argument allows for this flexibility.
 def create_response(message, status_code, **kwargs):
     response = {'message': message}
@@ -32,7 +31,6 @@ def validate_data(request, schema):
     raw_json = request.get_data(as_text=True)
 
     # Load the JSON data and check for duplicate keys using the 'check_duplicate_keys' function
-    # If there are duplicate keys, 'json.loads' will return a tuple with an error message and status code
     result = json.loads(raw_json, object_pairs_hook=check_duplicate_keys)
     if isinstance(result, tuple):  
         return result
@@ -80,7 +78,6 @@ def validate_fields(data_dict):
             validation_func(field_data)
         except ValidationError as e:
             # If the validation function raises a ValidationError, return an error message
-            # The error message includes the name of the field and the custom error message from the staticmethods validations function
             return create_response(f"{field_name}: {str(e)}", 400)
 
 # Checks if two values match. If they don't, returns an error message.
@@ -101,7 +98,7 @@ def check_no_change(value1, value2, error_message):
 def check_field(User, field, value, error_message):
     # Retrieve a user where the specified field has the specified value
     user_with_same_field = get_model_by_field(User, field, value)
-    # Check if such a user exists. If it does, return an error response.
+    # Check if such a user with the specified field exists. If it does, return an error response.
     response = check_match(user_with_same_field, None, error_message)
     if response:
         return response
@@ -110,7 +107,7 @@ def check_field(User, field, value, error_message):
 def get_model_by_field(Model, field, value):
     return Model.query.filter_by(**{field: value}).scalar()
 
-# The join operation is necessary to connect the PantryItem and Pantry tables together.
+# This join operation is necessary to connect the PantryItem and Pantry tables together.
 # This is because the PantryItem model doesn’t have a direct reference to the User model. By joining these tables, we can access the fields of both models in our query,
 # allowing us to filter for the current user.
 def get_user_pantry_query(user_id):

@@ -16,7 +16,6 @@ class BaseSchema(ma.Schema):
         if unknown:
             raise ValidationError(f'Only required fields {tuple(self.fields.keys())} are allowed')
 
-    # This method is also decorated with @validates_schema and is another custom validation method.
     # It checks if any of the fields in the data are empty or contain only spaces. 
     @validates_schema
     def validate_empty_fields(self, data, **kwargs):

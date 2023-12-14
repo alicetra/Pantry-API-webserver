@@ -8,12 +8,10 @@ from setup import db
 from jwt_config import get_current_user
 
 # 'url_prefix' is a path to prepend to all URLs associated with the Blueprint.
-# In this case, all routes defined on the 'users_bp' Blueprint will have '/users' prepended to them. Adhering to D.R.Y 
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
 # This function processes a data dictionary and normalizes all field values to lowercase,
 # except for the password fields as for security reason you want that to be case_sensitive_fields.
-# This is to provide consistency in the input format of the database and remove duplication.
 # Refractoring this in a function ensures consistent application of rules, simplifies code maintenance, and enhances readability
 def process_and_normalize_data(data, fields):
     case_sensitive_fields = ['password', 'old_password', 'new_password', 'confirm_password']
@@ -124,20 +122,21 @@ def forget_password():
         return data
 
     fields = schema.fields.keys()
+    # You might ask yourself why we need to normalised the data and converts all field values to lowercase if all password fields are case insentive,
+    # its because security_answer is a required field and that field is case-insentive.
     processed_data = process_and_normalize_data(data, fields)
 
     user = get_model_by_field(User,'username', processed_data['username'])
 
     # Check if the user object is None or if the user's security answer doesn't match the processed data's security answer. 
-    #Having the option to verified that this your account through a security answer if you forgot your password is a widely used standard.
+    # Having the option to verified that this your account through a security answer if you forgot your password is a widely used standard.
     if user is None or not user.check_security_answer(processed_data['security_answer']):
         # If either condition is true, imediatelly return a response with a message 'Invalid username or security answer' and a 401 status code, 
         # This stops the execution of the rest of the code, effectively preventing the the reset of password due to failed identity verification.
         return create_response('Invalid username or security answer', 401)
 
-    #Note that I am doing the staticmethod validations after the code is making sure that user exist and have sucessfully provided their security answer.
-    #If they can not identify themselves there is no point to validate new_password for the requirements of a password
-    # prior to that stage since they won't be able to change their password. This avoid unecessary computations.
+    # Note that I am doing the staticmethod validations after the code is making sure that user exist and have sucessfully provided their security answer.
+    # This avoid unecessary computations.
     data_dict = prepare_data_dict(processed_data, fields, User)
     
     response = validate_fields(data_dict)
@@ -158,7 +157,7 @@ def forget_password():
     if response:
         return response
 
-    #if it passed all the checks and we are executed this code. It means that user can sucessfully reset their password. 
+    #if it passed all the checks and we are executing this next line of code. It means that user can sucessfully reset their password. 
     # Set the user's password to the new password
     user.set_password(processed_data['new_password'])  
     # Commit the changes to the database
@@ -180,14 +179,11 @@ def reset_password():
     user = get_current_user()
 
     fields = schema.fields.keys()
-    # You might ask yourself why we need to normalised the data and converts all field values to lowercase if all password fields are case insentive,
-    # its because user is a required field and that field is case-insentive.
-    processed_data = process_and_normalize_data(data, fields)
 
     # Check if the old password provided by the user matches the existing password. This is to add that extra layer of identification before changing a password.
     # This step is crucial to prevent unauthorized password changes in scenarios where a user's account is left logged in and unattended (idle). 
     # Without this check, anyone with access to an idle session could change the password, potentially compromising the account's security.
-    response = check_match(user.check_password(processed_data['old_password']), True, 'Invalid old password')
+    response = check_match(user.check_password(data['old_password']), True, 'Invalid old password')
     # If the old password is invalid, immediately return a response indicating the mismatch.
     # This stops the execution of the rest of the code, effectively preventing the the reset of  password due to failed identity verification.
     if response:
@@ -200,20 +196,20 @@ def reset_password():
         return response
 
     # Check if the new password matches the confirm password.
-    response = check_match(processed_data['new_password'], processed_data['confirm_password'], 'New password and confirm password do not match')
+    response = check_match(data['new_password'], data['confirm_password'], 'New password and confirm password do not match')
     # If they don't match, immediately return a response indicating the mismatch.
     # The rest of the code won't be executed.
     if response:
         return response
 
     # Check if the new password is different from the old password
-    response = check_match(user.check_password(processed_data['new_password']), False, 'New password must be different from old password')
+    response = check_match(user.check_password(data['new_password']), False, 'New password must be different from old password')
     # If the new password is the same as the old password, immediately return a response indicating that the new password must be different.
     # The rest of the code won't be executed.
     if response:
         return response
 
-    user.set_password(processed_data['new_password'])
+    user.set_password(data['new_password'])
     db.session.commit()
     return create_response('Password reset successfully', 200)
 
@@ -237,7 +233,7 @@ def reset_security_answer():
     # Without this check, anyone with access to an idle session could change the password, potentially compromising the account's security.
     response = check_match(user.check_security_answer(processed_data['old_security_answer']), True, 'Invalid old security answer')
     # If the old security answer is invalid (i.e., it does not match the existing security answer), the function immediately returns a response indicating the mismatch.
-    # This stops the execution of the rest of the code, effectively preventing the security answer change due to failed identity verification.
+    # This stops the execution of the rest of the code.
     if response:
         return response
 

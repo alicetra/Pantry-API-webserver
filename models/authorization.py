@@ -29,7 +29,7 @@ class RevokedToken(db.Model):
 
 class UserSchema(BaseSchema):
      #Serialization/deserialization and validation of the data. Might seem reduntant to define the type again as the type is define in the model for what is accepted input.
-     #However putting validating in the schema will allow for validation error to be raise before the data is processed or stored.
+     #However putting validating in the schema will allow for validation error to be raise before the data is processed.
     username = fields.Str(required=True)
     password = fields.Str(required=True)
 

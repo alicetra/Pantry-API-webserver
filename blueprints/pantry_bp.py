@@ -107,7 +107,6 @@ def post_pantry_item():
     if response:
         return response
 
-    # After passing the check that this is not a duplicate in the database.
     # This line loads the new item data into the schema . This converts the data into a format that can be used to create a new PantryItem object.
     data = schema.load(data)
     # This line creates a new PantryItem object using the loaded data.
@@ -131,9 +130,6 @@ def post_pantry_item():
 def delete_pantry_item(item):
     user = get_current_user()
 
-    # This converts the input item from the route to lowercase. 
-    # This is done to ensure that the item names are treated in a case-insensitive manner. 
-    # Since all items in our pantry are saved in a case-insensitive manner,
     # I wanted the retrieval to be case-insensitive too.
     normalized_item = normalize_item(item)
 
@@ -151,10 +147,8 @@ def delete_pantry_item(item):
     # If the item does not exist
     else:
         # This line returns a response indicating that the item does not exist in the database, along with a 400 status code.
-        # The 400 status code is returned when the item does not exist in the database, 
-        # which could be considered as an invalid user input - the user is trying to delete an item that doesn’t exist.
-        # Returning a 400 status code makes it clear that the requested operation of this route (which is for deleting an item) has failed.
-        return create_response(f"{normalized_item} doesn't exist in the database", 400)
+        # The 404 status code is returned when the item does not exist in the database, .
+        return create_response(f"{normalized_item} doesn't exist in the database", 404)
 
 
 
@@ -169,24 +163,18 @@ def update_pantry(item):
 
     user = get_current_user()
 
-    # This converts the input item from the route to lowercase. 
-    # This is done to ensure that the item names are treated in a case-insensitive manner. 
-    # Since all items in our pantry are saved in a case-insensitive manner,
     # I wanted the retrieval to be case-insensitive too.
     normalized_item = normalize_item(item)
 
-    # This line sets the variable 'updated' to False as an initial state.
     # This variable is used to track whether any actual update operation has been performed on the pantry item since in the schema fields are optional.
     updated = False
 
     # This grab the item in the user pantry that matched the item provided in the URL
     pantry_item = get_user_pantry_query(user.id).filter(PantryItem.item == normalized_item).scalar()
-
-    # This line checks if pantry_item is None. If it is, it means that no item matching the normalized_item was found in the pantry.
+    # This line checks if pantry_item returned None. 
     if pantry_item is None:
-        # This line returns a response indicating that the item doesn't exist in the database, along with a 400 status code.
-        # The return statement immediately ends the function execution, and the rest of the code will not be executed.
-        return create_response(f"{normalized_item} doesn't exist in the pantry", 400)
+        # This line returns a response indicating that the item doesn't exist in the database, along with a 404 status code.
+        return create_response(f"{normalized_item} doesn't exist in the pantry", 404)
 
     # Note that I am doing the staticmethod validations after the code check that the item exist in the database first.
     # If the item doesn't exist, there will be no update and therefore a validation is not required of the new data.
@@ -201,8 +189,7 @@ def update_pantry(item):
     # This line checks if 'used_by_date' is a key in the request (inputted) data.
     if 'used_by_date' in data:
          # this line calls the check_no_change function to see if the new used_by_date is different from the current one.
-         # If they are the same, check_no_change will return a response indicating that no update is needed, and this response will be immediately returned to the client and 
-         # the rest of the code will not be executed.
+         # If they are the same, check_no_change will return a response indicating that no update is needed, and this response will be immediately returned to the client.
         response = check_no_change(pantry_item.used_by_date, data['used_by_date'], f"{normalized_item} could not update used_by_date because the data is the same")
         if response:
             return response
@@ -214,8 +201,7 @@ def update_pantry(item):
     # This line checks if 'count' is a key in the request (inputted) data.    
     if 'count' in data:
         # If 'count' is in the data, this line calls the check_no_change function to see if the new count is different from the current one.
-        # If they are the same, check_no_change will return a response indicating that no update is needed, and this response will be immediately returned to the client and 
-        # the rest of the code will not be executed.
+        # If they are the same, check_no_change will return a response indicating that no update is needed, and this response will be immediately returned to the client.
         response = check_no_change(pantry_item.count, data['count'], f"{normalized_item} could not update count because the data is the same")
         if response:
             return response
@@ -251,7 +237,7 @@ def get_runout_items():
     user = get_current_user()
     # This line queries the database directly for items in the user's pantry where the count is 0.
     runout_items = get_user_pantry_query(user.id).filter(PantryItem.count == 0).all()
-    # This line checks if the runout_items list is not empty, which means there are out of stock items.
+    # This line checks if the runout_items return is not empty, which means there are out of stock items.
     if runout_items:
             # If there are out of stock items, this line returns a response with
             # a list of these items, each in their dictionary format, along with a 200 status code..
@@ -263,7 +249,6 @@ def get_runout_items():
 
 
 # The "<int:days>" in the route is a dynamic part of the URL. 
-# Flask's routing system allows for type specification in the dynamic parts of routes. 
 # By specifying "int", we're telling Flask that this part of the route should be an integer. 
 # If a request comes in with a non-integer value in this part of the URL, Flask will automatically respond with a 404 Not Found error. 
 # This means we don't need to manually handle the error case where a non-integer is provided, Flask does it for us.
