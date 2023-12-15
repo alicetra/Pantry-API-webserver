@@ -14,7 +14,7 @@ def create_response(message, status_code, **kwargs):
     response.update(kwargs)
     return jsonify(response), status_code
 
-
+#  When you load a JSON string into a dictionary using Marshmallow, it will only keep the last value of any duplicate keys. However I don't want duplicate keys to be accepted at all.
 def check_duplicate_keys(pairs):
     keys = [key for key, value in pairs]
     # if the length of the list of keys is not equal to the length of the set of keys, it means there are duplicates
