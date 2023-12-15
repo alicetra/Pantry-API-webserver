@@ -18,13 +18,18 @@ def normalize_item(item):
     normalized_item = item.lower().strip()
     return normalized_item
 
-# pantry_item.__dict__ is a function that returns a dictionary containing the attributes of the pantry_item (model) as keys and their corresponding values.
-#The dictionary comprehension then iterates over these key-value pairs.
-# It excludes attributes that start with '_', 'pantry', 'item_id', and 'pantry_id'.
-# This function helps to return the data that you wish in the routes while adhering to DRY.
-# the reason why I excluded certain key is that I wanted my return to be relevant to the user.
-def pantry_item_to_dict(pantry_item):
-    return {key: value for key, value in pantry_item.__dict__.items() if not key.startswith('_') and key != 'pantry' and key != 'item_id' and key != 'pantry_id'}
+# n this code, isinstance(items, list) checks if items is a list. If it is, the function returns a list of serialized items
+# if items is not a list, the function treats it as a single PantryItem object and returns a single serialized item.
+# This function is then used in each route to serialize the pantry items before returning them in the response. I added an extra field to serialized and return in my response.
+def serialize_pantry_items(items):
+    pantry_item_schema = PantryItemSchema()
+    # Check if 'items' is a list
+    if isinstance(items, list):
+        return [dict(pantry_item_schema.dump(item), extra_field='run_out_time') for item in items]
+    else:
+        # If 'items' is not a list, treat it as a single item
+        return dict(pantry_item_schema.dump(items), extra_field='run_out_time')
+
 
 @pantry_bp.route("/", methods=["GET"])
 # This route is JWT required one since user can only access their own pantry
@@ -36,8 +41,8 @@ def get_pantry():
     pantry_items = get_user_pantry_query(user.id).all()
     # This line checks if there are any items in the pantry.
     if pantry_items:
-        # If there are items, it returns a 200 status code (indicating success) and a list of the items in dictionary form. 
-        return create_response([pantry_item_to_dict(item) for item in pantry_items], 200)
+        # If there are items, it returns a 200 status code (indicating success) nd the item details using the schema.
+         return create_response(serialize_pantry_items(pantry_items), 200)
     # If there are no items in the pantry.
     else:
         # it returns a 200 status code and a message indicating that the pantry is empty. The route  purpose of displaying the pantry is still sucessfull hence the 200 status. 
@@ -57,8 +62,8 @@ def get_pantry_item(item):
     pantry_item = get_user_pantry_query(user.id).filter(PantryItem.item == normalized_item).scalar()
     # If pantry_item is not none
     if pantry_item:
-        # It returns a 200 status code (indicating success) and the item details in dictionary form.
-        return create_response(pantry_item_to_dict(pantry_item), 200)
+        # It returns a 200 status code (indicating success) and the item details using the schema.
+        return create_response(serialize_pantry_items(pantry_item), 200)
     # If pantry_item did return none 
     else:
         # It returns a 404 status code (indicating that the requested resource could not be found) and a message indicating that the item does not exist in the user's pantry.
@@ -235,8 +240,8 @@ def get_runout_items():
     # This line checks if the runout_items return is not empty, which means there are out of stock items.
     if runout_items:
             # If there are out of stock items, this line returns a response with
-            # a list of these items, each in their dictionary format, along with a 200 status code..
-        return create_response([pantry_item_to_dict(item) for item in runout_items], 200)
+            # a list of these items, along with a 200 status code.
+        return create_response(serialize_pantry_items(runout_items), 200)
         # If there are no out of stock items (i.e., the runout_items list is empty), 
         # this line returns a response indicating that there are no out of stock items, along with a 200 status code.
     else:
@@ -265,7 +270,7 @@ def get_items_used_by(days):
     ).all()
      # If there are items to use, return them in the response
     if items_to_use:
-        return create_response([pantry_item_to_dict(item) for item in items_to_use], 200)
+        return create_response(serialize_pantry_items(items_to_use), 200)
     else:
         return create_response(f"You have no items to be used in the next {days} days", 200)
 
@@ -276,13 +281,12 @@ def get_items_used_by(days):
 def get_expired_items():
     user = get_current_user()
     now = datetime.now().date()
-
     # filters for items that have expired and therefore is less (passed) than the current date
     expired_items = get_user_pantry_query(user.id).filter(
         cast(PantryItem.used_by_date, Date) < now
     ).all()
      # If there are expired items, return them in the response
     if expired_items:
-        return create_response([pantry_item_to_dict(item) for item in expired_items], 200)
+        return create_response(serialize_pantry_items(expired_items), 200)
     else:
         return create_response("You have no expired items", 200)
